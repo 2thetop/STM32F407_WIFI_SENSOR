@@ -1,10 +1,10 @@
-#include "stm32f1xx.h"
+#include "stm32f4xx.h"
 #include "CircularQueue.h"
 
 
-// CQ Buffer¸¦ ÃÊ±âÈ­ ÇÏ´Â ÇÔ¼ö.
-// CQ¸¦ »ç¿ëÇÏ±â Àü¿¡ ÇÑ¹ø È£ÃâÇÏ´Â ÇÔ¼ö.
-// CQ Buffer´Â ¿øÇüÅ¥·Î ±¸ÇöµÇ¾ú°í MAX_CQ_BUFFER_COUNT-1°³ ±îÁö ¹öÆÛ¸µÀÌ °¡´ÉÇÔ.
+// CQ Bufferï¿½ï¿½ ï¿½Ê±ï¿½È­ ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½.
+// CQï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ¹ï¿½ È£ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½.
+// CQ Bufferï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ MAX_CQ_BUFFER_COUNT-1ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Û¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
 void CQ_InitBuffer(PCQ_BUFFER pCQ)
 {
 	uint32_t	i;
@@ -26,8 +26,8 @@ void CQ_RemoveAll(PCQ_BUFFER pCQ)
 	pCQ->nTail = 0;
 }
 
-// ³»ºÎ ÇÔ¼ö.
-// CQ Buffer¿¡ Ã¤¿öÁø ÆÐÅ¶ µ¥ÀÌÅÍÀÇ °³¼ö¸¦ ±¸ÇÏ´Â ÇÔ¼ö.
+// ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½.
+// CQ Bufferï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¶ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½.
 uint32_t CQ_GetDataCount(PCQ_BUFFER pCQ)
 {
 	uint32_t _count = 0;
@@ -41,8 +41,8 @@ uint32_t CQ_GetDataCount(PCQ_BUFFER pCQ)
 	return _count;
 }
 
-// ³»ºÎ ÇÔ¼ö.
-// CQ Buffer¿¡ ºñ¾î ÀÖ´Â ¹öÆÛÀÇ °³¼ö¸¦ ±¸ÇÏ´Â ÇÔ¼ö.
+// ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½.
+// CQ Bufferï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½.
 uint32_t CQ_GetFreeCount(PCQ_BUFFER pCQ)
 {
 	uint32_t _count = MAX_CQ_BUFFER_COUNT-1;
@@ -56,22 +56,22 @@ uint32_t CQ_GetFreeCount(PCQ_BUFFER pCQ)
 	return _count;
 }
 
-//³»ºÎ ÇÔ¼ö
-// CQ BufferÀÇ Head¸¦ ±¸ÇÏ´Â ÇÔ¼ö.
+//ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
+// CQ Bufferï¿½ï¿½ Headï¿½ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½.
 uint32_t CQ_GetHead(PCQ_BUFFER pCQ)
 {
 	return pCQ->nHead;
 }
 
-//³»ºÎ ÇÔ¼ö
-// CQ BufferÀÇ TailÀ»±¸ÇÏ´Â ÇÔ¼ö.
+//ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
+// CQ Bufferï¿½ï¿½ Tailï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½.
 uint32_t CQ_GetTail(PCQ_BUFFER pCQ)
 {
 	return pCQ->nTail;
 }
 
-//³»ºÎ ÇÔ¼ö
-// CQ BufferÀÇ Head¸¦ Áõ°¡½ÃÅ°´Â ÇÔ¼ö.
+//ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
+// CQ Bufferï¿½ï¿½ Headï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å°ï¿½ï¿½ ï¿½Ô¼ï¿½.
 uint32_t CQ_IncreaseHead(PCQ_BUFFER pCQ)
 {
 	pCQ->nHead++;
@@ -81,8 +81,8 @@ uint32_t CQ_IncreaseHead(PCQ_BUFFER pCQ)
 	return pCQ->nHead;
 }
 
-//³»ºÎ ÇÔ¼ö
-// CQ BufferÀÇ TailÀ» Áõ°¡½ÃÅ°´Â ÇÔ¼ö.
+//ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
+// CQ Bufferï¿½ï¿½ Tailï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å°ï¿½ï¿½ ï¿½Ô¼ï¿½.
 uint32_t CQ_IncreaseTail(PCQ_BUFFER pCQ)
 {
 	pCQ->nTail++;
@@ -92,15 +92,15 @@ uint32_t CQ_IncreaseTail(PCQ_BUFFER pCQ)
 	return pCQ->nTail;
 }
 
-//³»ºÎ ÇÔ¼ö
-// CQ Buffer°¡ ºñ¾îÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö.
+//ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
+// CQ Bufferï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½.
 uint32_t CQ_IsEmpty(PCQ_BUFFER pCQ)
 {
 	return ((uint32_t)(pCQ->nHead == pCQ->nTail));
 }
 
-//³»ºÎ ÇÔ¼ö
-// CQ Buffer°¡ FullÀÎÁö È®ÀÎÇÏ´Â ÇÔ¼ö.
+//ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
+// CQ Bufferï¿½ï¿½ Fullï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½.
 uint32_t CQ_IsFull(PCQ_BUFFER pCQ)
 {
 	uint32_t nNewHead = pCQ->nHead + 1;
@@ -110,9 +110,9 @@ uint32_t CQ_IsFull(PCQ_BUFFER pCQ)
 	return ((uint32_t)(pCQ->nTail == nNewHead));
 }
 
-//³»ºÎ ÇÔ¼ö
-// CQ Buffer¿¡¼­ ºñ¾î ÀÖ´Â ¹öÆÛÀÇ Æ÷ÀÎÅÍ¸¦ ¾ò´Â ÇÔ¼ö.
-// ºó ¹öÆÛ°¡ ¾ø´Ù¸é NULLÀ» ¹ÝÈ¯.
+//ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
+// CQ Bufferï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½.
+// ï¿½ï¿½ ï¿½ï¿½ï¿½Û°ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½ NULLï¿½ï¿½ ï¿½ï¿½È¯.
 volatile uint8_t* CQ_GetFreeBuffer(PCQ_BUFFER pCQ)
 {
 	volatile uint8_t* _pBuffer = NULL;
@@ -124,9 +124,9 @@ volatile uint8_t* CQ_GetFreeBuffer(PCQ_BUFFER pCQ)
 	return _pBuffer;
 }
 
-//³»ºÎ ÇÔ¼ö
-// CQ Buffer¿¡¼­ µ¥ÀÌÅÍ°¡ Ã¤¿öÁø ¹öÆÛÀÇ Æ÷ÀÎÅÍ¸¦ ¾ò´Â ÇÔ¼ö.
-// µ¥ÀÌÅÍ°¡ Ã¤¿öÁø ¹öÆÛ°¡ ¾ø´Ù¸é NULLÀ» ¹ÝÈ¯.
+//ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
+// CQ Bufferï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í°ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½.
+// ï¿½ï¿½ï¿½ï¿½ï¿½Í°ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Û°ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½ NULLï¿½ï¿½ ï¿½ï¿½È¯.
 volatile uint8_t* CQ_GetDataBuffer(PCQ_BUFFER pCQ)
 {
 	volatile uint8_t* _pBuffer = NULL;
