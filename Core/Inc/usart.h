@@ -28,7 +28,7 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "CircularQueue.h"
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart4;
@@ -40,6 +40,47 @@ extern UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN Private defines */
 
+typedef enum {
+	UART_NONE=-1,
+	UART_P1,
+	UART_P2,
+	UART_P3,
+	UART_P4,
+	UART_P5,
+	UART_P6,
+ 	UART_MAX,
+	UART_PORT_MAX = UART_MAX,
+	UART_VCP=UART_MAX,
+	UART_ESP12=UART_P1,
+	UART_TEMP_HUM=UART_P2,
+	UART_DUST=UART_P3,
+	UART_VIBRATION=UART_P4,
+	UART_UV=UART_P5,
+	UART_TENSIOIN=UART_P6,
+	UART_DEBUG=UART_VCP,
+} UART_TYPE;
+
+
+typedef enum {
+	UART_BS=0x08,
+	UART_LF=0x0A,
+	UART_CR=0x0D,
+	UART_ESCAPE=0x1B,
+	UART_DEL=0x7F,
+	UART_PLUS=0x2B,
+} UART_CHAR;
+
+typedef struct {
+	CQ_BUFFER	rxQ;
+	CQ_BUFFER	txQ;
+	uint32_t 	isTransmitting;
+	uint8_t 	txBuffer[MAX_CQ_BUFFER_COUNT];
+	uint8_t		rxChar;
+	uint8_t		dummy[3];
+} UART_Q, *PUART_Q;;
+
+extern UART_Q gUarts[UART_MAX];
+
 /* USER CODE END Private defines */
 
 void MX_UART4_Init(void);
@@ -50,7 +91,19 @@ void MX_USART3_UART_Init(void);
 void MX_USART6_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+void UART_Init();
 
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
+void UART_TX_DefaultProc(void);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+void UART_RX_DefaultProc(void);
+
+
+void UartChar(UART_TYPE ut, const int8_t _ch);
+uint32_t UartPuts(UART_TYPE ut, const int8_t *str, int32_t len);
+void UartPrintf(UART_TYPE ut, const int8_t *fmt, ...);
+void HAL_UART_LoopbackTest(void);
+void HAL_UART_BypassTest(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

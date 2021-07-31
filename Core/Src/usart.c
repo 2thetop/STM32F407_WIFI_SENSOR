@@ -21,7 +21,10 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+#include <stdarg.h>	// va_list
+//#include "console.h"
 
+UART_Q gUarts[UART_MAX];
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart4;
@@ -478,6 +481,202 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
+void UART_Init()
+{
+	//gUarts[UART_P1] =
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+	PUART_Q pUartQ;
+
+         if(USART2 == huart->Instance)	pUartQ = &gUarts[UART_ESP12];
+	else if(USART3 == huart->Instance)	pUartQ = &gUarts[UART_DEBUG];
+	else return;
+
+	uint32_t _savedCount = CQ_GetDataCount(&pUartQ->txQ);
+	if(0 < _savedCount) {
+		uint32_t _transmitCount = CQ_PopString(&pUartQ->txQ, pUartQ->txBuffer, _savedCount);
+		HAL_UART_Transmit_IT(huart, pUartQ->txBuffer, _transmitCount);
+		pUartQ->isTransmitting = 1;
+	}
+	else {
+		pUartQ->isTransmitting = 0;
+	}
+}
+
+void UART_TX_DefaultProc(void)
+{
+	PUART_Q pUartQ;
+	uint32_t _savedCount;
+	uint32_t _transmitCount;
+
+	pUartQ = &gUarts[UART_ESP12];
+	if(0 == CQ_IsEmpty(&pUartQ->txQ)) {
+		if(0 == pUartQ->isTransmitting) {
+			_savedCount = CQ_GetDataCount(&pUartQ->txQ);
+			_transmitCount = CQ_PopString(&pUartQ->txQ, pUartQ->txBuffer, _savedCount);
+			HAL_UART_Transmit_IT(&huart2, pUartQ->txBuffer, _transmitCount);
+			pUartQ->isTransmitting = 1;
+		}
+	}
+
+	pUartQ = &gUarts[UART_DEBUG];
+	if(0 == CQ_IsEmpty(&pUartQ->txQ)) {
+		if(0 == pUartQ->isTransmitting) {
+			_savedCount = CQ_GetDataCount(&pUartQ->txQ);
+			_transmitCount = CQ_PopString(&pUartQ->txQ, pUartQ->txBuffer, _savedCount);
+			HAL_UART_Transmit_IT(&huart3, pUartQ->txBuffer, _transmitCount);
+			pUartQ->isTransmitting = 1;
+		}
+	}
+}
+
+
+void UART_RX_DefaultProc(void)
+{
+	PUART_Q pUartQ;
+	uint32_t _receiveCount;
+	uint8_t _ch;
+
+	pUartQ = &gUarts[UART_ESP12];
+	PCQ_BUFFER pRxQ = &pUartQ->rxQ;
+
+	if(0 == CQ_IsEmpty(pRxQ)) {
+		_receiveCount = CQ_GetDataCount(pRxQ);
+		for(uint32_t j=0; j<_receiveCount; j++) {
+			CQ_PopChar(pRxQ, &_ch);
+			UartChar(UART_DEBUG, _ch);
+			WiFi_ParsingProc(UART_ESP12, _ch);
+			putchar(_ch);
+		}
+	}
+
+	pUartQ = &gUarts[UART_DEBUG];
+	pRxQ = &pUartQ->rxQ;
+
+	if(0 == CQ_IsEmpty(pRxQ)) {
+		_receiveCount = CQ_GetDataCount(pRxQ);
+		for(uint32_t j=0; j<_receiveCount; j++) {
+			CQ_PopChar(pRxQ, &_ch);
+			UartChar(UART_ESP12, _ch);
+		}
+	}
+}
+
+
+/**
+  * @brief Rx Transfer completed callback.
+  * @param huart: UART handle.
+  * @retval None
+  */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	PUART_Q pUartQ;
+
+         if(USART2 == huart->Instance)	pUartQ = &gUarts[UART_ESP12];
+	else if(USART3 == huart->Instance)	pUartQ = &gUarts[UART_DEBUG];
+	else return;
+
+	CQ_PushChar(&pUartQ->rxQ, pUartQ->rxChar);
+	HAL_UART_Receive_IT(huart, &pUartQ->rxChar, 1);
+}
+
+void UartChar(UART_TYPE ut, const int8_t _ch)
+{
+	PCQ_BUFFER pQ = &gUarts[ut].txQ;
+
+	if(0 == CQ_IsFull(pQ))	{
+		CQ_PushChar(pQ, _ch);
+	}
+}
+
+
+uint32_t UartPuts(UART_TYPE ut, const int8_t *str, int32_t len)
+{
+	uint32_t _copyCount = 0;
+	uint32_t _freeCount = 0;
+
+	if (len) {
+		PCQ_BUFFER pQ = &gUarts[ut].txQ;
+
+		_freeCount = CQ_GetFreeCount(pQ);
+		_copyCount = (len < _freeCount) ? len:_freeCount;
+
+		CQ_PushString(pQ,(uint8_t*)str,_copyCount);
+
+		if(UART_DEBUG == ut) {
+			printf((const char*)str);
+		}
+	}
+
+	return _copyCount;
+}
+
+void UartPrintf(UART_TYPE ut, const int8_t *fmt, ...)
+{
+	va_list args;
+	int len;
+	int8_t _szFmt[128] = {0};
+
+	va_start(args, fmt);
+	len = vsprintf((char*)_szFmt, (const char*)fmt, args);
+	_szFmt[len] = NULL;
+	va_end(args);
+
+	UartPuts(ut, _szFmt, len);
+}
+
+uint8_t uartBuffer_[MAX_CQ_BUFFER_COUNT];
+
+void HAL_UART_LoopbackTest(void)
+{
+	PUART_Q pUartQ;
+
+	pUartQ = &gUarts[UART_ESP12];
+	if(0 == pUartQ->isTransmitting) {
+		uint32_t _receiveCount = CQ_GetDataCount(&pUartQ->rxQ);
+		if(0 < _receiveCount) {
+			uint32_t _copiedCount = CQ_PopString(&pUartQ->rxQ, uartBuffer_, _receiveCount);
+			CQ_PushString(&pUartQ->txQ, uartBuffer_, _copiedCount);
+		}
+	}
+
+	pUartQ = &gUarts[UART_DEBUG];
+	if(0 == pUartQ->isTransmitting) {
+		uint32_t _receiveCount = CQ_GetDataCount(&pUartQ->rxQ);
+		if(0 < _receiveCount) {
+			uint32_t _copiedCount = CQ_PopString(&pUartQ->rxQ, uartBuffer_, _receiveCount);
+			CQ_PushString(&pUartQ->txQ, uartBuffer_, _copiedCount);
+		}
+	}
+}
+
+
+void HAL_UART_BypassTest(void)
+{
+	PUART_Q pUartQ1;
+	PUART_Q pUartQ2;
+
+	pUartQ1 = &gUarts[UART_ESP12];
+	pUartQ2 = &gUarts[UART_DEBUG];
+
+	if(0 == pUartQ2->isTransmitting) {
+		uint32_t _receiveCount = CQ_GetDataCount(&pUartQ1->rxQ);
+		if(0 < _receiveCount) {
+			uint32_t _copiedCount = CQ_PopString(&pUartQ1->rxQ, uartBuffer_, _receiveCount);
+			CQ_PushString(&pUartQ2->txQ, uartBuffer_, _copiedCount);
+		}
+	}
+
+	if(0 == pUartQ1->isTransmitting) {
+		uint32_t _receiveCount = CQ_GetDataCount(&pUartQ2->rxQ);
+		if(0 < _receiveCount) {
+			uint32_t _copiedCount = CQ_PopString(&pUartQ2->rxQ, uartBuffer_, _receiveCount);
+			CQ_PushString(&pUartQ1->txQ, uartBuffer_, _copiedCount);
+		}
+	}
+}
 
 /* USER CODE END 1 */
 

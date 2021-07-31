@@ -67,7 +67,9 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint32_t current_tick_ = 0;
+	uint32_t display_time_tick_ = 0;
+	uint32_t check_reservation_tick_ = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -97,6 +99,24 @@ int main(void)
   MX_USART6_UART_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+
+  HAL_TIM_Base_Start_IT(&htim4);
+
+  //////////////////////////////////////////////////////////////////////////////////////
+  // UART ?��?��?�� ?��?��?��.
+  HAL_UART_Receive_IT(&huart1, &gUarts[UART_ESP12].rxChar, 1);
+  HAL_UART_Receive_IT(&huart2, &gUarts[UART_TEMP_HUM].rxChar, 1);
+  HAL_UART_Receive_IT(&huart3, &gUarts[UART_DUST].rxChar, 1);
+  HAL_UART_Receive_IT(&huart4, &gUarts[UART_VIBRATION].rxChar, 1);
+  HAL_UART_Receive_IT(&huart5, &gUarts[UART_UV].rxChar, 1);
+  HAL_UART_Receive_IT(&huart6, &gUarts[UART_TENSIOIN].rxChar, 1);
+
+  //////////////////////////////////////////////////////////////////////////////////////
+  // WiFi Module?�� 초기?�� ?��.
+  HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
+  //////////////////////////////////////////////////////////////////////////////////////
 
   /* USER CODE END 2 */
 
@@ -104,6 +124,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+      UART_RX_DefaultProc();
+      UART_TX_DefaultProc();
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
