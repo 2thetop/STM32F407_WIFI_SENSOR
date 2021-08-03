@@ -210,7 +210,7 @@ void TIM4_IRQHandler(void)
   /* USER CODE END TIM4_IRQn 0 */
   HAL_TIM_IRQHandler(&htim4);
   /* USER CODE BEGIN TIM4_IRQn 1 */
-  HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+
   /* USER CODE END TIM4_IRQn 1 */
 }
 
@@ -229,6 +229,15 @@ void OTG_FS_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if(TIM4 == htim->Instance)
+	{
+	  HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+	  //HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+	}
+}
 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

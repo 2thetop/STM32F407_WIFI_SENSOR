@@ -547,7 +547,7 @@ void UART_RX_DefaultProc(void)
 		for(uint32_t j=0; j<_receiveCount; j++) {
 			CQ_PopChar(pRxQ, &_ch);
 			UartChar(UART_DEBUG, _ch);
-			WiFi_ParsingProc(UART_ESP12, _ch);
+			//WiFi_ParsingProc(UART_ESP12, _ch);
 			putchar(_ch);
 		}
 	}
