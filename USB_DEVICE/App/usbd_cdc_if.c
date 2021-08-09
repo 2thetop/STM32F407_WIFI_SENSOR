@@ -32,6 +32,13 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+USBD_CDC_LineCodingTypeDef LineCoding =
+    {
+        115200,
+        0x00,
+        0x00,
+        0x08
+    };
 
 /* USER CODE END PV */
 
@@ -221,11 +228,29 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   /* 6      | bDataBits  |   1   | Number Data bits (5, 6, 7, 8 or 16).          */
   /*******************************************************************************/
     case CDC_SET_LINE_CODING:
-
+        LineCoding.bitrate   = (uint32_t)(pbuf[0]);
+        LineCoding.bitrate  |= (uint32_t)(pbuf[1]<<8);
+        LineCoding.bitrate  |= (uint32_t)(pbuf[2]<<16);
+        LineCoding.bitrate  |= (uint32_t)(pbuf[3]<<24);
+        LineCoding.format    = pbuf[4];
+        LineCoding.paritytype= pbuf[5];
+        LineCoding.datatype  = pbuf[6];
+#if 0
+        if (LineCoding.bitrate == 1200)
+        {
+          reset_ready = 1;
+        }
+#endif
     break;
 
     case CDC_GET_LINE_CODING:
-
+        pbuf[0] = (uint8_t)(LineCoding.bitrate);
+        pbuf[1] = (uint8_t)(LineCoding.bitrate>>8);
+        pbuf[2] = (uint8_t)(LineCoding.bitrate>>16);
+        pbuf[3] = (uint8_t)(LineCoding.bitrate>>24);
+        pbuf[4] = LineCoding.format;
+        pbuf[5] = LineCoding.paritytype;
+        pbuf[6] = LineCoding.datatype;
     break;
 
     case CDC_SET_CONTROL_LINE_STATE:
