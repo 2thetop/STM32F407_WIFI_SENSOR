@@ -52,7 +52,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void CheckSwitchLED();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -107,6 +107,7 @@ int main(void)
 
   HAL_TIM_Base_Start_IT(&htim4);
 
+#if 0
   //////////////////////////////////////////////////////////////////////////////////////
   // UART ?��?��?�� ?��?��?��.
   HAL_UART_Receive_IT(&huart1, &gUarts[UART_ESP12].rxChar, 1);
@@ -120,19 +121,27 @@ int main(void)
   // WiFi Module?�� 초기?�� ?��.
   HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
   //////////////////////////////////////////////////////////////////////////////////////
-
+#endif
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+
+
   while (1)
   {
+	  current_tick_ = HAL_GetTick();
+#if 0
       UART_RX_DefaultProc();
       UART_TX_DefaultProc();
-
+#endif
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+#if 1
+      CheckSwitchLED();
+#endif
   }
   /* USER CODE END 3 */
 }
@@ -181,7 +190,50 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void CheckSwitchLED()
+{
+	GPIO_PinState tact_sw1_state = HAL_GPIO_ReadPin(TACT_SW1_GPIO_Port, TACT_SW1_Pin);
+	GPIO_PinState tact_sw2_state = HAL_GPIO_ReadPin(TACT_SW2_GPIO_Port, TACT_SW2_Pin);
+	GPIO_PinState dip_sw1_state = HAL_GPIO_ReadPin(DIP_SW1_GPIO_Port, DIP_SW1_Pin);
+	GPIO_PinState dip_sw2_state = HAL_GPIO_ReadPin(DIP_SW2_GPIO_Port, DIP_SW2_Pin);
+	GPIO_PinState dip_sw3_state = HAL_GPIO_ReadPin(DIP_SW3_GPIO_Port, DIP_SW3_Pin);
+	GPIO_PinState dip_sw4_state = HAL_GPIO_ReadPin(DIP_SW4_GPIO_Port, DIP_SW4_Pin);
 
+	if ((GPIO_PIN_RESET == tact_sw1_state) || (GPIO_PIN_RESET == tact_sw2_state))  {
+		  HAL_GPIO_WritePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin, GPIO_PIN_RESET);
+	}
+	else {
+		  HAL_GPIO_WritePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin, GPIO_PIN_SET);
+	}
+
+	if (GPIO_PIN_RESET == dip_sw1_state) {
+		HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_RESET);
+	}
+	else {
+		  HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_SET);
+	}
+
+	if (GPIO_PIN_RESET == dip_sw2_state) {
+		  HAL_GPIO_WritePin(LED3_BLUE_GPIO_Port, LED3_BLUE_Pin, GPIO_PIN_RESET);
+	}
+	else {
+		  HAL_GPIO_WritePin(LED3_BLUE_GPIO_Port, LED3_BLUE_Pin, GPIO_PIN_SET);
+	}
+
+	if (GPIO_PIN_RESET == dip_sw3_state) {
+		  HAL_GPIO_WritePin(LED4_YELLOW_GPIO_Port, LED4_YELLOW_Pin, GPIO_PIN_RESET);
+	}
+	else {
+		  HAL_GPIO_WritePin(LED4_YELLOW_GPIO_Port, LED4_YELLOW_Pin, GPIO_PIN_SET);
+	}
+
+	if (GPIO_PIN_RESET == dip_sw4_state) {
+		  HAL_GPIO_WritePin(LED5_GREEN_GPIO_Port, LED5_GREEN_Pin, GPIO_PIN_RESET);
+	}
+	else {
+		  HAL_GPIO_WritePin(LED5_GREEN_GPIO_Port, LED5_GREEN_Pin, GPIO_PIN_SET);
+	}
+}
 /* USER CODE END 4 */
 
 /**
