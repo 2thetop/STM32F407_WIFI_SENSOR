@@ -36,6 +36,14 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+#define BLINK_WHITE_LED_INTERVAL		500
+
+typedef struct st_AP_INFO {
+	uint8_t szSSID[64];
+	uint8_t szPassword[64];
+	uint32_t portNum;
+} APINFO, *PAPINFO;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -46,13 +54,19 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t board_id;
+
+APINFO apInfo = { "WIFI_2.4G", "1234567890", 7890 };
+
+uint32_t board_id_ = 0;
+uint32_t blink_white_led_tick_ = 0;
+
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+void BlinkWhiteLED(uint32_t _current_tick);
 void CheckSwitchLED();
 uint32_t GetBoardID();
 /* USER CODE END PFP */
@@ -72,7 +86,6 @@ int main(void)
 	uint32_t current_tick_ = 0;
 	uint32_t display_time_tick_ = 0;
 	uint32_t check_reservation_tick_ = 0;
-
 	uint32_t test_cdc_tick_ = 0;
 
   /* USER CODE END 1 */
@@ -113,10 +126,11 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim4);
 
 #if 1
-  board_id = GetBoardID();
+
+	board_id_ = GetBoardID();
 
   //////////////////////////////////////////////////////////////////////////////////////
-  // UART ?��?��?�� ?��?��?��.
+  // UART ????????? ?????????.
   HAL_UART_Receive_IT(&huart1, &gUarts[UART_ESP12].rxChar, 1);
   //HAL_UART_Receive_IT(&huart2, &gUarts[UART_TEMP_HUM].rxChar, 1);
   //HAL_UART_Receive_IT(&huart3, &gUarts[UART_DUST].rxChar, 1);
@@ -125,9 +139,11 @@ int main(void)
   //HAL_UART_Receive_IT(&huart6, &gUarts[UART_TENSIOIN].rxChar, 1);
 
   //////////////////////////////////////////////////////////////////////////////////////
-  // WiFi Module?�� 초기?�� ?��.
+  // WiFi Module??? 초기??? ???.
   HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
   //////////////////////////////////////////////////////////////////////////////////////
+
+
 #endif
   /* USER CODE END 2 */
 
@@ -139,6 +155,9 @@ int main(void)
   while (1)
   {
 	  current_tick_ = HAL_GetTick();
+
+	  BlinkWhiteLED(current_tick_);
+
 #if 0
       UART_RX_DefaultProc();
       UART_TX_DefaultProc();
@@ -207,6 +226,14 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void BlinkWhiteLED(uint32_t _current_tick)
+{
+	if (BLINK_WHITE_LED_INTERVAL < (_current_tick - blink_white_led_tick_)) {
+		blink_white_led_tick_ = _current_tick;
+		HAL_GPIO_TogglePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
+	}
+}
+
 void CheckSwitchLED()
 {
 	GPIO_PinState tact_sw1_state = HAL_GPIO_ReadPin(TACT_SW1_GPIO_Port, TACT_SW1_Pin);
@@ -252,33 +279,29 @@ void CheckSwitchLED()
 	}
 }
 
+<<<<<<< Updated upstream
 
 uint32_t GetBoardID()
 {
 	uint32_t _board_id = 0;
 
-	GPIO_PinState dip_sw1_state = HAL_GPIO_ReadPin(DIP_SW1_GPIO_Port, DIP_SW1_Pin);
-	GPIO_PinState dip_sw2_state = HAL_GPIO_ReadPin(DIP_SW2_GPIO_Port, DIP_SW2_Pin);
-	GPIO_PinState dip_sw3_state = HAL_GPIO_ReadPin(DIP_SW3_GPIO_Port, DIP_SW3_Pin);
-	GPIO_PinState dip_sw4_state = HAL_GPIO_ReadPin(DIP_SW4_GPIO_Port, DIP_SW4_Pin);
-
-	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW1_GPIO_Port, DIP_SW1_Pin)) {
+	if (GPIO_PIN_RESET == dip_sw1_state) {
 		_board_id |= 0x01;
 	}
 
-	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW2_GPIO_Port, DIP_SW2_Pin)) {
+	if (GPIO_PIN_RESET == dip_sw2_state) {
 		_board_id |= 0x02;
 	}
 
-	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW3_GPIO_Port, DIP_SW3_Pin)) {
+	if (GPIO_PIN_RESET == dip_sw3_state) {
 		_board_id |= 0x04;
 	}
 
-	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW4_GPIO_Port, DIP_SW4_Pin)) {
+	if (GPIO_PIN_RESET == dip_sw4_state) {
 		_board_id |= 0x08;
 	}
 
-	return _board_id;
+	return _board_id
 }
 
 /* USER CODE END 4 */

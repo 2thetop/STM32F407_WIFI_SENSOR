@@ -137,6 +137,8 @@ static int8_t CDC_TransmitCplt_FS(uint8_t *pbuf, uint32_t *Len, uint8_t epnum);
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_DECLARATION */
 
+uint8_t USBD_CDC_SOF(struct _USBD_HandleTypeDef *pdev);
+
 /* USER CODE END PRIVATE_FUNCTIONS_DECLARATION */
 
 /**
@@ -342,6 +344,25 @@ static int8_t CDC_TransmitCplt_FS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
 }
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
+
+uint8_t USBD_CDC_SOF(struct _USBD_HandleTypeDef *pdev)
+{
+
+  if (rx_full == true)
+  {
+    uint32_t buf_len;
+
+    buf_len = (rx_len - cdcAvailable()) - 1;
+
+    if (buf_len >= USB_FS_MAX_PACKET_SIZE)
+    {
+      USBD_CDC_ReceivePacket(pdev);
+      rx_full = false;
+    }
+  }
+
+  return 0;
+}
 
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
