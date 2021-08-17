@@ -24,6 +24,8 @@
 
 /* USER CODE BEGIN INCLUDE */
 
+#include "usart.h"
+
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -347,6 +349,7 @@ static int8_t CDC_TransmitCplt_FS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
 
 uint8_t USBD_CDC_SOF(struct _USBD_HandleTypeDef *pdev)
 {
+#if 0
 
   if (rx_full == true)
   {
@@ -360,7 +363,24 @@ uint8_t USBD_CDC_SOF(struct _USBD_HandleTypeDef *pdev)
       rx_full = false;
     }
   }
+#else
+	uint32_t _receiveCount; 
+	uint8_t _ch;
 
+	PUART_Q pUartQ = &gUarts[UART_CDC];
+	PCQ_BUFFER pRxQ = &pUartQ->rxQ;
+		
+	if(0 == CQ_IsEmpty(pRxQ)) {
+		_receiveCount = CQ_GetDataCount(pRxQ);
+		for(uint32_t j=0; j<_receiveCount; j++) {
+			CQ_PopChar(pRxQ, &_ch);
+			//UartChar(UART_DEBUG, _ch);
+			//WiFi_ParsingProc(UART_ESP12, _ch);
+			//putchar(_ch);
+		} 
+	}
+
+#endif
   return 0;
 }
 

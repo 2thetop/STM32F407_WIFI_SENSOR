@@ -279,29 +279,27 @@ void CheckSwitchLED()
 	}
 }
 
-<<<<<<< Updated upstream
-
 uint32_t GetBoardID()
 {
 	uint32_t _board_id = 0;
 
-	if (GPIO_PIN_RESET == dip_sw1_state) {
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW1_GPIO_Port, DIP_SW1_Pin)) {
 		_board_id |= 0x01;
 	}
 
-	if (GPIO_PIN_RESET == dip_sw2_state) {
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW2_GPIO_Port, DIP_SW2_Pin)) {
 		_board_id |= 0x02;
 	}
 
-	if (GPIO_PIN_RESET == dip_sw3_state) {
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW3_GPIO_Port, DIP_SW3_Pin)) {
 		_board_id |= 0x04;
 	}
 
-	if (GPIO_PIN_RESET == dip_sw4_state) {
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW4_GPIO_Port, DIP_SW4_Pin)) {
 		_board_id |= 0x08;
 	}
 
-	return _board_id
+	return _board_id;
 }
 
 /* USER CODE END 4 */
