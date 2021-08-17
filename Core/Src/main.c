@@ -46,6 +46,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint32_t board_id;
 
 /* USER CODE END PV */
 
@@ -53,6 +54,7 @@
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void CheckSwitchLED();
+uint32_t GetBoardID();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -70,6 +72,9 @@ int main(void)
 	uint32_t current_tick_ = 0;
 	uint32_t display_time_tick_ = 0;
 	uint32_t check_reservation_tick_ = 0;
+
+	uint32_t test_cdc_tick_ = 0;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -107,15 +112,17 @@ int main(void)
 
   HAL_TIM_Base_Start_IT(&htim4);
 
-#if 0
+#if 1
+  board_id = GetBoardID();
+
   //////////////////////////////////////////////////////////////////////////////////////
   // UART ?��?��?�� ?��?��?��.
   HAL_UART_Receive_IT(&huart1, &gUarts[UART_ESP12].rxChar, 1);
-  HAL_UART_Receive_IT(&huart2, &gUarts[UART_TEMP_HUM].rxChar, 1);
-  HAL_UART_Receive_IT(&huart3, &gUarts[UART_DUST].rxChar, 1);
-  HAL_UART_Receive_IT(&huart4, &gUarts[UART_VIBRATION].rxChar, 1);
-  HAL_UART_Receive_IT(&huart5, &gUarts[UART_UV].rxChar, 1);
-  HAL_UART_Receive_IT(&huart6, &gUarts[UART_TENSIOIN].rxChar, 1);
+  //HAL_UART_Receive_IT(&huart2, &gUarts[UART_TEMP_HUM].rxChar, 1);
+  //HAL_UART_Receive_IT(&huart3, &gUarts[UART_DUST].rxChar, 1);
+  //HAL_UART_Receive_IT(&huart4, &gUarts[UART_VIBRATION].rxChar, 1);
+  //HAL_UART_Receive_IT(&huart5, &gUarts[UART_UV].rxChar, 1);
+  //HAL_UART_Receive_IT(&huart6, &gUarts[UART_TENSIOIN].rxChar, 1);
 
   //////////////////////////////////////////////////////////////////////////////////////
   // WiFi Module?�� 초기?�� ?��.
@@ -139,7 +146,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-#if 1
+
+#if 0
+      if ((current_tick_ - test_cdc_tick_) > 1000) {
+    	  test_cdc_tick_ = current_tick_;
+    	  uint8_t buffer[100] = "CDC test string...\r\n";
+    	  uint16_t string_length = 21;
+    	  CDC_Transmit_FS(buffer, string_length);
+      }
+#endif
+
+#if 0
       CheckSwitchLED();
 #endif
   }
@@ -234,6 +251,36 @@ void CheckSwitchLED()
 		  HAL_GPIO_WritePin(LED5_GREEN_GPIO_Port, LED5_GREEN_Pin, GPIO_PIN_SET);
 	}
 }
+
+
+uint32_t GetBoardID()
+{
+	uint32_t _board_id = 0;
+
+	GPIO_PinState dip_sw1_state = HAL_GPIO_ReadPin(DIP_SW1_GPIO_Port, DIP_SW1_Pin);
+	GPIO_PinState dip_sw2_state = HAL_GPIO_ReadPin(DIP_SW2_GPIO_Port, DIP_SW2_Pin);
+	GPIO_PinState dip_sw3_state = HAL_GPIO_ReadPin(DIP_SW3_GPIO_Port, DIP_SW3_Pin);
+	GPIO_PinState dip_sw4_state = HAL_GPIO_ReadPin(DIP_SW4_GPIO_Port, DIP_SW4_Pin);
+
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW1_GPIO_Port, DIP_SW1_Pin)) {
+		_board_id |= 0x01;
+	}
+
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW2_GPIO_Port, DIP_SW2_Pin)) {
+		_board_id |= 0x02;
+	}
+
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW3_GPIO_Port, DIP_SW3_Pin)) {
+		_board_id |= 0x04;
+	}
+
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW4_GPIO_Port, DIP_SW4_Pin)) {
+		_board_id |= 0x08;
+	}
+
+	return _board_id;
+}
+
 /* USER CODE END 4 */
 
 /**

@@ -25,6 +25,7 @@
 //#include "console.h"
 
 UART_Q gUarts[UART_MAX];
+
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart4;
