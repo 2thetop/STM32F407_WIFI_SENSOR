@@ -36,7 +36,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define WHITE_LED_ON					0
 #define BLINK_WHITE_LED_INTERVAL		500
 
 typedef struct st_AP_INFO {
@@ -156,7 +156,9 @@ int main(void)
   {
 	  current_tick_ = HAL_GetTick();
 
+	  #if WHITE_LED_ON
 	  BlinkWhiteLED(current_tick_);
+#endif
 
 #if 0
       UART_RX_DefaultProc();
