@@ -591,6 +591,19 @@ void UART_RX_DefaultProc(void)
 		}
 	}
 
+	pUartQ = &gUarts[UART_UV];
+	pRxQ = &pUartQ->rxQ;
+
+	if(0 == CQ_IsEmpty(pRxQ)) {
+		_receiveCount = CQ_GetDataCount(pRxQ);
+		for(uint32_t j=0; j<_receiveCount; j++) {
+			CQ_PopChar(pRxQ, &_ch);
+			//UartChar(UART_ESP12, _ch);
+			
+		}
+	}
+
+
 	pUartQ = &gUarts[UART_DEBUG];
 	pRxQ = &pUartQ->rxQ;
 
