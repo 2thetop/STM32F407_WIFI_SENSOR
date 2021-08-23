@@ -84,9 +84,9 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	uint32_t current_tick_ = 0;
-	uint32_t display_time_tick_ = 0;
-	uint32_t check_reservation_tick_ = 0;
-	uint32_t test_cdc_tick_ = 0;
+	//uint32_t display_time_tick_ = 0;
+	//uint32_t check_reservation_tick_ = 0;
+	//uint32_t test_cdc_tick_ = 0;
 
   /* USER CODE END 1 */
 
