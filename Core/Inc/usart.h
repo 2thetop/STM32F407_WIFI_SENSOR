@@ -48,10 +48,10 @@ typedef enum {
 	UART_P4,
 	UART_P5,
 	UART_P6,
- 	UART_MAX,
-	UART_PORT_MAX = UART_MAX,
-	UART_VCP=UART_MAX,
-	UART_CDC=UART_MAX,
+ 	UART_LAST,
+	MAX_UART_PORT = UART_LAST,
+	UART_VCP=UART_LAST,
+	UART_CDC=UART_LAST,
 	UART_ESP12=UART_P1,
 	UART_TEMP_HUM=UART_P2,
 	UART_DUST=UART_P3,
@@ -80,7 +80,7 @@ typedef struct {
 	uint8_t		dummy[3];
 } UART_Q, *PUART_Q;;
 
-extern UART_Q gUarts[UART_MAX];
+extern UART_Q gUarts[MAX_UART_PORT];
 
 /* USER CODE END Private defines */
 

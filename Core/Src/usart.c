@@ -24,7 +24,8 @@
 #include <stdarg.h>	// va_list
 //#include "console.h"
 
-UART_Q gUarts[UART_MAX];
+UART_Q gUarts[MAX_UART_PORT];
+UART_HandleTypeDef *pUartHandleArray[MAX_UART_PORT];
 
 /* USER CODE END 0 */
 
@@ -34,7 +35,6 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 UART_HandleTypeDef huart6;
-UART_HandleTypeDef *pUartHandleArray[UART_PORT_MAX];
 
 /* UART4 init function */
 void MX_UART4_Init(void)
@@ -362,13 +362,6 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /* USER CODE BEGIN USART6_MspInit 1 */
-  
-	pUartHandleArray[UART_ESP12] = &huart1;
-	pUartHandleArray[UART_TEMP_HUM] = &huart2;
-	pUartHandleArray[UART_DUST] = &huart3;
-	pUartHandleArray[UART_VIBRATION] = &huart4;
-	pUartHandleArray[UART_UV] = &huart5;
-	pUartHandleArray[UART_TENSIOIN] = &huart6;
 
   /* USER CODE END USART6_MspInit 1 */
   }
@@ -492,7 +485,21 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 /* USER CODE BEGIN 1 */
 void UART_Init()
 {
+	MX_UART4_Init();
+	MX_UART5_Init();
+	MX_USART1_UART_Init();
+	MX_USART2_UART_Init();
+	MX_USART3_UART_Init();
+	MX_USART6_UART_Init();
+
 	//gUarts[UART_P1] =
+
+	pUartHandleArray[UART_ESP12] = &huart1;
+	pUartHandleArray[UART_TEMP_HUM] = &huart2;
+	pUartHandleArray[UART_DUST] = &huart3;
+	pUartHandleArray[UART_VIBRATION] = &huart4;
+	pUartHandleArray[UART_UV] = &huart5;
+	pUartHandleArray[UART_TENSIOIN] = &huart6;
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
@@ -547,7 +554,7 @@ void UART_TX_DefaultProc(void)
 #else
 	UART_HandleTypeDef *phuart;
 
-	for(int i=0; i<UART_PORT_MAX; i++) {
+	for(int i = 0; i < MAX_UART_PORT; i++) {
 		phuart = pUartHandleArray[i];
 		pUartQ = &gUarts[i];
 		
