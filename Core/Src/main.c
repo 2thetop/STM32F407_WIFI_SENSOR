@@ -237,6 +237,11 @@ void BlinkWhiteLED(uint32_t _current_tick)
 	if (BLINK_WHITE_LED_INTERVAL < (_current_tick - blink_white_led_tick_)) {
 		blink_white_led_tick_ = _current_tick;
 		HAL_GPIO_TogglePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
+#if 0
+		uint8_t strValue[10] = "350";
+		PUART_Q pRxQ = &gUarts[UART_UV].rxQ;
+		CQ_PushString(pRxQ, strValue, 3);
+#endif		
 	}
 }
 
