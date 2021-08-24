@@ -500,6 +500,25 @@ void UART_Init()
 	pUartHandleArray[UART_VIBRATION] = &huart4;
 	pUartHandleArray[UART_UV] = &huart5;
 	pUartHandleArray[UART_TENSIOIN] = &huart6;
+
+	//gUarts[UART_ESP12];
+	//gUarts[UART_TEMP_HUM];
+	//gUarts[UART_DUST];
+
+	gUarts[UART_VIBRATION].useReceiveTimeout = 1;
+	gUarts[UART_VIBRATION].isReceived = 0;
+	gUarts[UART_VIBRATION].lastReceiveTime = 0;
+	gUarts[UART_VIBRATION].receiveTimout = UART_RECEIVE_TIMEOUT;
+	
+	gUarts[UART_UV].useReceiveTimeout = 1;
+	gUarts[UART_UV].isReceived = 0;
+	gUarts[UART_UV].lastReceiveTime = 0;
+	gUarts[UART_UV].receiveTimout = UART_RECEIVE_TIMEOUT;
+
+	gUarts[UART_TENSIOIN].useReceiveTimeout = 1;
+	gUarts[UART_TENSIOIN].isReceived = 0;
+	gUarts[UART_TENSIOIN].lastReceiveTime = 0;
+	gUarts[UART_TENSIOIN].receiveTimout = UART_RECEIVE_TIMEOUT;
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
@@ -591,10 +610,11 @@ void UART_RX_DefaultProc(void)
 		}
 	}
 
-	pUartQ = &gUarts[UART_UV];
+	pUartQ = &gUarts[UART_DUST];
 	pRxQ = &pUartQ->rxQ;
 
-	if(0 == CQ_IsEmpty(pRxQ)) {
+	if ((0 == CQ_IsEmpty(pRxQ)) && 
+		(0 != pUartQ->isReceived)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
 		for(uint32_t j=0; j<_receiveCount; j++) {
 			CQ_PopChar(pRxQ, &_ch);
@@ -603,7 +623,46 @@ void UART_RX_DefaultProc(void)
 		}
 	}
 
+	pUartQ = &gUarts[UART_VIBRATION];
+	pRxQ = &pUartQ->rxQ;
 
+	if ((0 == CQ_IsEmpty(pRxQ)) && 
+		(0 != pUartQ->isReceived)) {
+		_receiveCount = CQ_GetDataCount(pRxQ);
+		for(uint32_t j=0; j<_receiveCount; j++) {
+			CQ_PopChar(pRxQ, &_ch);
+			//UartChar(UART_ESP12, _ch);
+			
+		}
+	}
+
+	pUartQ = &gUarts[UART_UV];
+	pRxQ = &pUartQ->rxQ;
+
+	if ((0 == CQ_IsEmpty(pRxQ)) && 
+		(0 != pUartQ->isReceived)) {
+		_receiveCount = CQ_GetDataCount(pRxQ);
+		for(uint32_t j=0; j<_receiveCount; j++) {
+			CQ_PopChar(pRxQ, &_ch);
+			//UartChar(UART_ESP12, _ch);
+			
+		}
+	}
+
+	pUartQ = &gUarts[UART_TENSIOIN];
+	pRxQ = &pUartQ->rxQ;
+
+	if ((0 == CQ_IsEmpty(pRxQ)) && 
+		(0 != pUartQ->isReceived)) {
+		_receiveCount = CQ_GetDataCount(pRxQ);
+		for(uint32_t j=0; j<_receiveCount; j++) {
+			CQ_PopChar(pRxQ, &_ch);
+			//UartChar(UART_ESP12, _ch);
+			
+		}
+	}
+
+#if 0
 	pUartQ = &gUarts[UART_DEBUG];
 	pRxQ = &pUartQ->rxQ;
 
@@ -614,6 +673,7 @@ void UART_RX_DefaultProc(void)
 			UartChar(UART_ESP12, _ch);
 		}
 	}
+#endif
 }
 
 
@@ -625,7 +685,8 @@ void UART_RX_DefaultProc(void)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	PUART_Q pUartQ;
-
+	uint32_t _currenrt_tick;
+	
          if(USART1 == huart->Instance)	pUartQ = &gUarts[UART_ESP12];
 	else if(USART2 == huart->Instance)	pUartQ = &gUarts[UART_TEMP_HUM];
     else if(USART3 == huart->Instance)	pUartQ = &gUarts[UART_DUST];
@@ -633,6 +694,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	else if(UART5 == huart->Instance)	pUartQ = &gUarts[UART_UV];
 	else if(USART6 == huart->Instance)	pUartQ = &gUarts[UART_TENSIOIN];
 	else return;
+
+	if (0 != pUartQ->useReceiveTimeout) {
+		pUartQ->lastReceiveTime = HAL_GetTick();
+	}
 
 	CQ_PushChar(&pUartQ->rxQ, pUartQ->rxChar);
 	HAL_UART_Receive_IT(huart, &pUartQ->rxChar, 1);
@@ -647,6 +712,25 @@ void UartChar(UART_TYPE ut, const int8_t _ch)
 	}
 }
 
+
+void UART_CheckReceiveTimeout(void)
+{
+	PUART_Q pUartQ;
+	uint32_t _current_tick = HAL_GetTick();
+
+	for(int i=0; i < MAX_UART_PORT; i++) {
+		pUartQ = &gUarts[i];
+		
+		if (0 != pUartQ->useReceiveTimeout) {
+			if ((0 == pUartQ->isReceived) &&
+				(pUartQ->receiveTimout <= (_current_tick -  pUartQ->lastReceiveTime))) {
+				if  (0 == CQ_IsEmpty(&pUartQ->rxQ)) {
+					pUartQ->isReceived = 1;
+				}
+			}
+		}
+	}
+}
 
 uint32_t UartPuts(UART_TYPE ut, const int8_t *str, int32_t len)
 {

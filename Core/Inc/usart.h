@@ -39,6 +39,7 @@ extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN Private defines */
+#define UART_RECEIVE_TIMEOUT	100
 
 typedef enum {
 	UART_NONE=-1,
@@ -75,9 +76,14 @@ typedef struct {
 	CQ_BUFFER	rxQ;
 	CQ_BUFFER	txQ;
 	uint32_t 	isTransmitting;
+	uint32_t	useReceiveTimeout;
+	uint32_t 	isReceived;
+	uint32_t	lastReceiveTime;
+	uint32_t 	receiveTimout;
 	uint8_t 	txBuffer[MAX_CQ_BUFFER_COUNT];
 	uint8_t		rxChar;
 	uint8_t		dummy[3];
+	
 } UART_Q, *PUART_Q;;
 
 extern UART_Q gUarts[MAX_UART_PORT];
@@ -105,6 +111,8 @@ uint32_t UartPuts(UART_TYPE ut, const int8_t *str, int32_t len);
 void UartPrintf(UART_TYPE ut, const int8_t *fmt, ...);
 void HAL_UART_LoopbackTest(void);
 void HAL_UART_BypassTest(void);
+void UART_CheckReceiveTimeout(void);
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

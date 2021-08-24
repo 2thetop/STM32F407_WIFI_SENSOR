@@ -243,6 +243,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       HAL_GPIO_TogglePin(LED4_YELLOW_GPIO_Port, LED4_YELLOW_Pin);
       HAL_GPIO_TogglePin(LED5_GREEN_GPIO_Port, LED5_GREEN_Pin);
 #endif
+
+		UART_CheckReceiveTimeout();
 	}
 }
 
