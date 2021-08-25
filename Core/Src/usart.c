@@ -680,7 +680,7 @@ void UART_RX_DefaultProc(void)
 			
 		}
 #else
-		strncpy(buffer, "[UART_UV]:", 10);
+		strncpy((char*)buffer, "[UART_UV]:", 10);
 		CQ_PopString(pRxQ, buffer+10, _receiveCount);
 		CDC_Transmit_FS(buffer, _receiveCount + 10);
 #endif

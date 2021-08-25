@@ -39,7 +39,7 @@ extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN Private defines */
-#define UART_RECEIVE_TIMEOUT	100
+#define UART_RECEIVE_TIMEOUT	300
 
 #if 0
 
