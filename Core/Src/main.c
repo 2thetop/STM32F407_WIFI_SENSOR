@@ -86,7 +86,7 @@ int main(void)
 	uint32_t current_tick_ = 0;
 	//uint32_t display_time_tick_ = 0;
 	//uint32_t check_reservation_tick_ = 0;
-	//uint32_t test_cdc_tick_ = 0;
+	uint32_t test_cdc_tick_ = 0;
 
   /* USER CODE END 1 */
 
@@ -109,18 +109,19 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM4_Init();
-#if 0
+
   MX_UART4_Init();
   MX_UART5_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
-#else 
-	UART_Init();
-#endif
+
   MX_USB_DEVICE_Init();
+
   /* USER CODE BEGIN 2 */
+  UART_Init();
+  
   HAL_GPIO_WritePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(LED3_BLUE_GPIO_Port, LED3_BLUE_Pin, GPIO_PIN_SET);
@@ -130,8 +131,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim4);
 
 #if 1
-
-	board_id_ = GetBoardID();
+  board_id_ = GetBoardID();
 
   //////////////////////////////////////////////////////////////////////////////////////
   // UART ????????? ?????????.
@@ -146,8 +146,6 @@ int main(void)
   // WiFi Module??? 초기??? ???.
   HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
   //////////////////////////////////////////////////////////////////////////////////////
-
-
 #endif
   /* USER CODE END 2 */
 
@@ -160,7 +158,7 @@ int main(void)
   {
 	  current_tick_ = HAL_GetTick();
 
-	  #if WHITE_LED_ON
+#if WHITE_LED_ON
 	  BlinkWhiteLED(current_tick_);
 #endif
 
@@ -172,8 +170,8 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-#if 0
-      if ((current_tick_ - test_cdc_tick_) > 1000) {
+#if 1
+      if ((current_tick_ - test_cdc_tick_) > 10) {
     	  test_cdc_tick_ = current_tick_;
     	  uint8_t buffer[100] = "CDC test string...\r\n";
     	  uint16_t string_length = 21;

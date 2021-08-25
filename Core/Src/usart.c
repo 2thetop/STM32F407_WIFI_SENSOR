@@ -23,7 +23,10 @@
 /* USER CODE BEGIN 0 */
 #include <stdio.h>
 #include <stdarg.h>	// va_list
+#include <string.h>
 //#include "console.h"
+#include "usb_device.h"
+
 
 UART_Q gUarts[MAX_UART_PORT];
 UART_HandleTypeDef *pUartHandleArray[MAX_UART_PORT];
@@ -516,40 +519,31 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 /* USER CODE BEGIN 1 */
 void UART_Init()
 {
-	MX_UART4_Init();
-	MX_UART5_Init();
-	MX_USART1_UART_Init();
-	MX_USART2_UART_Init();
-	MX_USART3_UART_Init();
-	MX_USART6_UART_Init();
+  pUartHandleArray[UART_ESP12] = &huart1;
+  pUartHandleArray[UART_TEMP_HUM] = &huart2;
+  pUartHandleArray[UART_DUST] = &huart3;
+  pUartHandleArray[UART_VIBRATION] = &huart4;
+  pUartHandleArray[UART_UV] = &huart5;
+  pUartHandleArray[UART_TENSIOIN] = &huart6;
 
-	//gUarts[UART_P1] =
+  //gUarts[UART_ESP12];
+  //gUarts[UART_TEMP_HUM];
+  //gUarts[UART_DUST];
 
-	pUartHandleArray[UART_ESP12] = &huart1;
-	pUartHandleArray[UART_TEMP_HUM] = &huart2;
-	pUartHandleArray[UART_DUST] = &huart3;
-	pUartHandleArray[UART_VIBRATION] = &huart4;
-	pUartHandleArray[UART_UV] = &huart5;
-	pUartHandleArray[UART_TENSIOIN] = &huart6;
+  gUarts[UART_VIBRATION].useReceiveTimeout = 1;
+  gUarts[UART_VIBRATION].isReceived = 0;
+  gUarts[UART_VIBRATION].lastReceiveTime = 0;
+  gUarts[UART_VIBRATION].receiveTimout = UART_RECEIVE_TIMEOUT;
 
-	//gUarts[UART_ESP12];
-	//gUarts[UART_TEMP_HUM];
-	//gUarts[UART_DUST];
+  gUarts[UART_UV].useReceiveTimeout = 1;
+  gUarts[UART_UV].isReceived = 0;
+  gUarts[UART_UV].lastReceiveTime = 0;
+  gUarts[UART_UV].receiveTimout = UART_RECEIVE_TIMEOUT;
 
-	gUarts[UART_VIBRATION].useReceiveTimeout = 1;
-	gUarts[UART_VIBRATION].isReceived = 0;
-	gUarts[UART_VIBRATION].lastReceiveTime = 0;
-	gUarts[UART_VIBRATION].receiveTimout = UART_RECEIVE_TIMEOUT;
-	
-	gUarts[UART_UV].useReceiveTimeout = 1;
-	gUarts[UART_UV].isReceived = 0;
-	gUarts[UART_UV].lastReceiveTime = 0;
-	gUarts[UART_UV].receiveTimout = UART_RECEIVE_TIMEOUT;
-
-	gUarts[UART_TENSIOIN].useReceiveTimeout = 1;
-	gUarts[UART_TENSIOIN].isReceived = 0;
-	gUarts[UART_TENSIOIN].lastReceiveTime = 0;
-	gUarts[UART_TENSIOIN].receiveTimout = UART_RECEIVE_TIMEOUT;
+  gUarts[UART_TENSIOIN].useReceiveTimeout = 1;
+  gUarts[UART_TENSIOIN].isReceived = 0;
+  gUarts[UART_TENSIOIN].lastReceiveTime = 0;
+  gUarts[UART_TENSIOIN].receiveTimout = UART_RECEIVE_TIMEOUT;
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
@@ -627,7 +621,8 @@ void UART_RX_DefaultProc(void)
 	PUART_Q pUartQ;
 	uint32_t _receiveCount;
 	uint8_t _ch;
-
+    uint8_t buffer[100];
+    
 	pUartQ = &gUarts[UART_ESP12];
 	PCQ_BUFFER pRxQ = &pUartQ->rxQ;
 
@@ -677,11 +672,18 @@ void UART_RX_DefaultProc(void)
 		(0 != pUartQ->isReceived)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
 		printf("UART_UV: _receiveCount=%d", _receiveCount);
+        
+#if 0        
 		for(uint32_t j=0; j<_receiveCount; j++) {
 			CQ_PopChar(pRxQ, &_ch);
 			//UartChar(UART_ESP12, _ch);
 			
 		}
+#else
+		strncpy(buffer, "[UART_UV]:", 10);
+		CQ_PopString(pRxQ, buffer+10, _receiveCount);
+		CDC_Transmit_FS(buffer, _receiveCount + 10);
+#endif
 	}
 
 	pUartQ = &gUarts[UART_DUST];
@@ -737,7 +739,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	PUART_Q pUartQ;
 
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
 	
          if(USART1 == huart->Instance)	pUartQ = &gUarts[UART_ESP12];
 	else if(USART2 == huart->Instance)	pUartQ = &gUarts[UART_TEMP_HUM];
@@ -754,7 +756,7 @@ HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
 	CQ_PushChar(&pUartQ->rxQ, pUartQ->rxChar);
 	HAL_UART_Receive_IT(huart, &pUartQ->rxChar, 1);
 
-HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, SET);
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
 }
 
 void UartChar(UART_TYPE ut, const int8_t _ch)
