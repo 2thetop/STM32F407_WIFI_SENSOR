@@ -53,4 +53,7 @@ usbd_cdc_if.pbi: \
   D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h \
   D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
   D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
-  D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h
+  D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h \
+  D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Core/Inc\usart.h \
+  D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Core/Inc/main.h \
+  D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Core/Inc/CircularQueue.h
