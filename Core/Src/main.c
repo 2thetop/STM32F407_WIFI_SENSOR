@@ -137,10 +137,10 @@ int main(void)
   // UART ????????? ?????????.
   HAL_UART_Receive_IT(&huart1, &gUarts[UART_ESP12].rxChar, 1);
   HAL_UART_Receive_IT(&huart2, &gUarts[UART_TEMP_HUM].rxChar, 1);
-  HAL_UART_Receive_IT(&huart3, &gUarts[UART_DUST].rxChar, 1);
-  HAL_UART_Receive_IT(&huart4, &gUarts[UART_VIBRATION].rxChar, 1);
-  HAL_UART_Receive_IT(&huart5, &gUarts[UART_UV].rxChar, 1);
-  HAL_UART_Receive_IT(&huart6, &gUarts[UART_TENSIOIN].rxChar, 1);
+  HAL_UART_Receive_IT(&huart3, &gUarts[UART_TENSIOIN].rxChar, 1);
+  HAL_UART_Receive_IT(&huart4, &gUarts[UART_UV].rxChar, 1);
+  HAL_UART_Receive_IT(&huart5, &gUarts[UART_DUST].rxChar, 1);
+  HAL_UART_Receive_IT(&huart6, &gUarts[UART_VIBRATION].rxChar, 1);
 
   //////////////////////////////////////////////////////////////////////////////////////
   // WiFi Module??? 초기??? ???.

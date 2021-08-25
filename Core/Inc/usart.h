@@ -41,6 +41,8 @@ extern UART_HandleTypeDef huart6;
 /* USER CODE BEGIN Private defines */
 #define UART_RECEIVE_TIMEOUT	100
 
+#if 0
+
 typedef enum {
 	UART_NONE=-1,
 	UART_P1,
@@ -62,6 +64,30 @@ typedef enum {
 	UART_DEBUG=UART_VCP,
 } UART_TYPE;
 
+#else
+
+typedef enum {
+	UART_NONE=-1,
+	UART_P1,
+	UART_P2,
+	UART_P3,
+	UART_P4,
+	UART_P5,
+	UART_P6,
+ 	UART_LAST,
+	MAX_UART_PORT = UART_LAST,
+	UART_VCP=UART_LAST,
+	UART_CDC=UART_LAST,
+	UART_ESP12=UART_P1,
+	UART_TEMP_HUM=UART_P2,
+	UART_TENSIOIN=UART_P3,
+	UART_UV=UART_P4,
+	UART_DUST=UART_P5,
+	UART_VIBRATION=UART_P6,
+	UART_DEBUG=UART_VCP,
+} UART_TYPE;
+
+#endif
 
 typedef enum {
 	UART_BS=0x08,
