@@ -34,8 +34,12 @@ uint32_t CQ_GetDataCount(PCQ_BUFFER pCQ)
 
 	if(pCQ->nHead != pCQ->nTail) 
 	{
-		if(pCQ->nTail < pCQ->nHead) _count = pCQ->nHead - pCQ->nTail;
-		else 												_count = pCQ->nHead - pCQ->nTail + MAX_CQ_BUFFER_COUNT;
+		if(pCQ->nTail < pCQ->nHead) {
+			_count = pCQ->nHead - pCQ->nTail;
+		}
+		else { 												
+			_count = pCQ->nHead - pCQ->nTail + MAX_CQ_BUFFER_COUNT;
+		}
 	}
 	
 	return _count;
@@ -49,8 +53,12 @@ uint32_t CQ_GetFreeCount(PCQ_BUFFER pCQ)
 
 	if(pCQ->nHead != pCQ->nTail) 
 	{
-		if(pCQ->nTail < pCQ->nHead) _count = (pCQ->nTail+MAX_CQ_BUFFER_COUNT-1) - pCQ->nHead;
-		else 												_count = (pCQ->nTail-1) - pCQ->nHead;
+		if(pCQ->nTail < pCQ->nHead) {
+			_count = (pCQ->nTail+MAX_CQ_BUFFER_COUNT-1) - pCQ->nHead;
+		}
+		else {
+			_count = (pCQ->nTail-1) - pCQ->nHead;
+		}
 	}
 	
 	return _count;
