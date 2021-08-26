@@ -170,7 +170,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-#if 1
+#if 0
       if ((current_tick_ - test_cdc_tick_) > 10) {
     	  test_cdc_tick_ = current_tick_;
     	  uint8_t buffer[100] = "CDC test string...\r\n";

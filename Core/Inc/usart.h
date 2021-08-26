@@ -68,7 +68,7 @@ typedef enum {
 
 typedef enum {
 	UART_NONE=-1,
-	UART_P1,
+	UART_P1=0,
 	UART_P2,
 	UART_P3,
 	UART_P4,
@@ -106,7 +106,8 @@ typedef struct {
 	uint32_t 	isReceived;
 	uint32_t	lastReceiveTime;
 	uint32_t 	receiveTimout;
-	uint8_t 	txBuffer[MAX_CQ_BUFFER_COUNT];
+	uint32_t 	bufferIndex;
+	uint8_t 	buffer[MAX_CQ_BUFFER_COUNT];
 	uint8_t		rxChar;
 	uint8_t		dummy[3];
 	
