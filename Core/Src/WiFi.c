@@ -60,13 +60,12 @@ typedef struct AP_LIST_DATA {
 	"1.kr.pool.ntp.org"
 	"clock.iptime.co.kr"
 */
-#if 0
-const int8_t szNTPServerAddress[] = "1.nl.pool.ntp.org";
+ 
+//nst int8_t szNTPServerAddress[] = "1.nl.pool.ntp.org";
 
 // Test Server Address
 const int8_t szTestServerAddress[] = "52.79.53.140";		//eroo@52.79.53.140 / oore!@#$
 const int32_t nTestServerPort = 15151;
-#endif
 
 // Device ID
 //const int8_t szDeviceID[] = "a123456789";
@@ -120,7 +119,7 @@ const WIFI_COMM_ITEM rspTable[MAX_RESPONSE_TABLE_COUNT] = {
 };	
 
 
-extern  time_t	timeRTC;
+//extern  time_t	timeRTC;
 
 
 static ESTATE parsingResponse(UART_TYPE _uartType, int8_t *line, uint32_t count);
@@ -131,10 +130,10 @@ static uint32_t CMD_GetBufferIndex(UART_TYPE _uartType);
 
 
 
-int32_t board_id_ = 1;
+//int32_t board_id_ = 1;
 
 
-static CMDLINE_PACK cmdPack[UART_MAX];
+static CMDLINE_PACK cmdPack[MAX_UART_PORT];
 
 volatile ESTATE gvReceiveMode = STATE_RECEIVE_MODE_INIT;
 static int nTotalReceiveDataCount = 0;
@@ -142,13 +141,13 @@ static int nCurrentReceiveDataCount = 0;
 static int nReceiveChannel = 0;
 static uint8_t aReceiveDataCount[3] = { 0 };
 
-static TCPD	gTCPD;
+//static TCPD	gTCPD;
 
 
 CSD	csd;
 LSD aLSD[4];
 
-NUD	nud;
+//NUD	nud;
 
 
 void InitWiFi()
@@ -186,17 +185,17 @@ void InitCSD(PCSD pCSD)
 	pCSD->wifi_command_recoonect_count_ = 0;
 	pCSD->wifi_command_recoonect_count_limit_ = 5;
 
-	pCSD->ntp_server_connected_ = false;
-	pCSD->ntp_read_ = false;
+	//pCSD->ntp_server_connected_ = 0;
+	//pCSD->ntp_read_ = 0;
 	
-	pCSD->server_connected_ = false;
-	pCSD->server_identified_ = false;
+	pCSD->server_connected_ = 0;
+	pCSD->server_identified_ = 0;
 
-	pCSD->ntp_retry_count_ = 0;
-	pCSD->max_ntp_retry_count_ = 5;
+	//pCSD->ntp_retry_count_ = 0;
+	//pCSD->max_ntp_retry_count_ = 5;
 
-	pCSD->last_ntp_time_tick_ = 0;
-	pCSD->max_ntp_time_tick_ = 10 * 1000;
+	//pCSD->last_ntp_time_tick_ = 0;
+	//pCSD->max_ntp_time_tick_ = 10 * 1000;
 
 	pCSD->last_ping_tick_ = 0;
 	pCSD->max_ping_tick_ = 60 * 1000;
@@ -376,22 +375,22 @@ uint32_t IsResendSensorData(void)
 }
 
 #if 0
-bool IsConnectedNTPServer() 
+uint8_t IsConnectedNTPServer() 
 {
 	return csd.ntp_server_connected_;
 }
 
-void SetConnectedNTPServer(bool _connected)
+void SetConnectedNTPServer(uint8_t _connected)
 {
 	csd.ntp_server_connected_ = _connected;
 }
 
-bool IsReadNTP() 
+uint8_t IsReadNTP() 
 {
 	return csd.ntp_read_;
 }
 
-void SetReadNTP(bool _ntp_read)
+void SetReadNTP(uint8_t _ntp_read)
 {
 	csd.ntp_read_ = _ntp_read;
 }
@@ -401,28 +400,28 @@ void SetNTPTImeTick(uint32_t _tick)
 	csd.last_ntp_time_tick_ = _tick;
 }
 
-bool IsExpiredNTPTImeTick(uint32_t _tick)
+uint8_t IsExpiredNTPTImeTick(uint32_t _tick)
 {
 	return ((csd.last_ntp_time_tick_ + csd.max_ntp_time_tick_) <= _tick);
 }
 
-bool CheckReceivedNTPTIme(uint32_t _tick)
+uint8_t CheckReceivedNTPTIme(uint32_t _tick)
 {
-	bool is_received_ntp_time = false;
+	uint8_t is_received_ntp_time = 0;
 	
-	if (true == IsConnectedNTPServer()) {
-		if(true == IsExpiredNTPTImeTick(_tick)) {
-			if (false == IsExceededNTPReryCount()) {
+	if (1 == IsConnectedNTPServer()) {
+		if(1 == IsExpiredNTPTImeTick(_tick)) {
+			if (0 == IsExceededNTPReryCount()) {
 				SetState(STATE_REQUEST_SEND_NTP_PACKET);
 				IncreaseNTPRetryCount();
 			}
 			else {
 				SetState(STATE_DISCONNECT_NTP_SERVER);
-				SetReadNTP(false);
+				SetReadNTP(0);
 			}
 		}
 		else {
-			is_received_ntp_time = true;
+			is_received_ntp_time = 1;
 		}
 	}
 	return is_received_ntp_time;
@@ -438,28 +437,28 @@ void IncreaseNTPRetryCount()
 	csd.ntp_retry_count_++;
 }
 
-bool IsExceededNTPReryCount()
+uint8_t IsExceededNTPReryCount()
 {
 	return (csd.max_ntp_retry_count_ <= csd.ntp_retry_count_);
 }
 #endif
 
-bool IsConnectedServer() 
+uint8_t IsConnectedServer() 
 {
 	return csd.server_connected_;
 }
 
-void SetConnectedServer(bool _server_connected)
+void SetConnectedServer(uint8_t _server_connected)
 {
 	csd.server_connected_ = _server_connected;
 }
 
-bool IsIdentifiedServer()
+uint8_t IsIdentifiedServer()
 {
 	return csd.server_identified_;
 }
 
-void SetIdentifiedServer(bool _server_identified)
+void SetIdentifiedServer(uint8_t _server_identified)
 {
 	csd.server_identified_ = _server_identified;
 }
@@ -469,21 +468,21 @@ void SetPingTick(uint32_t _tick)
 	csd.last_ping_tick_ = _tick;
 }
 
-bool IsExpiredPingTick(uint32_t _tick)
+uint8_t IsExpiredPingTick(uint32_t _tick)
 {
 	return ((csd.last_ping_tick_ + csd.max_ping_tick_) <= _tick);
 }
 
-bool CheckConnectingServer(uint32_t _tick)
+uint8_t CheckConnectingServer(uint32_t _tick)
 {
-	bool is_connecting_server = false;
+	uint8_t is_connecting_server = 0;
 	
-	if (true == IsConnectedServer()) {
-		if(true == IsExpiredPingTick(_tick)) {
+	if (1 == IsConnectedServer()) {
+		if(1 == IsExpiredPingTick(_tick)) {
 			SetState(STATE_RETRY_CONNECT_SERVER);
 		}
 		else {
-			is_connecting_server = true;
+			is_connecting_server = 1;
 		}
 	}
 	return is_connecting_server;
@@ -526,12 +525,12 @@ void SendWiFiCommand(ESTATE _state)
 		ConnectServer((int8_t *)szTestServerAddress, nTestServerPort);	SetLastCommand(_state); break;
 	case CMD_REQUEST_SEND_DATA:	
 		//UartPrintf(UART_ESP12, (const int8_t*)cmdTable[7].pstr);	SetLastCommand(_state); break;
+#if 0		
 	case CMD_REQUEST_IDENTIFY_SERVER:	
 		/*UartPuts(UART_ESP12, "AT+CIPSEND=0,18\r\n", 17);*/
 		RequestSendIdentifyCommand();	SetLastCommand(_state); break;
 	case CMD_SEND_IDENTIFY_SERVER:	
 		SendFuntion0Command();		SetLastCommand(_state);		break;	
-#if 0		
 	case CMD_REQUEST_SEND_NTP_TIME_TO_SERVER:	
 		RequestSendNTPTimeToServer();	SetLastCommand(_state);	break;	
 	case CMD_SEND_NTP_TIME_TO_SERVER:		
@@ -658,6 +657,8 @@ void DisconnectServer()
 	UartPuts(UART_ESP12, (const int8_t *)"AT+CIPCLOSE=0\r\n", 15 );
 }
 
+#if 0
+
 void RequestSendPacketToNTPServer(int8_t count)
 {
 	RequestToSendData(CHANNEL_NTP_SERVER, count);
@@ -680,6 +681,7 @@ void MakeFunctionCommand(PTCPD pTCPD, int nFuncNum, uint8_t nDataSize)
 	pTCPD->d.cFunction = (uint8_t)nFuncNum;
 	pTCPD->d.cSize = nDataSize;
 }
+#endif
 
 void RequestToSendData(int32_t ch_id, int32_t count)
 {
@@ -818,9 +820,8 @@ uint32_t WiFi_ParsingProc(UART_TYPE _uartType, uint8_t ch)
 	switch (ch) {
 	case UART_CR:
 		CMD_PushChar(_uartType, ch);
-
 		if (STATE_RECEIVE_MODE_DATA == gvReceiveMode) { 
-			if(true == CheckReceiveData(_uartType, ch)) {
+			if(1 == CheckReceiveData(_uartType, ch)) {
 				ParseReceiveData(_uartType, ch);
 				CMD_InitBuffer(_uartType);
 			}
@@ -831,7 +832,7 @@ uint32_t WiFi_ParsingProc(UART_TYPE _uartType, uint8_t ch)
 		if (STATE_RECEIVE_MODE_DATA == gvReceiveMode) { 
 			CMD_PushChar(_uartType, ch);
 
-			if(true == CheckReceiveData(_uartType, ch)) {
+			if(1 == CheckReceiveData(_uartType, ch)) {
 				ParseReceiveData(_uartType, ch);
 				CMD_InitBuffer(_uartType);
 			}
@@ -863,7 +864,7 @@ uint32_t WiFi_ParsingProc(UART_TYPE _uartType, uint8_t ch)
 		CMD_PushChar(_uartType, ch);
 
 		if(STATE_RECEIVE_MODE_PLUS <= gvReceiveMode) {
-			if(true == CheckReceiveData(_uartType, ch)) {
+			if(1 == CheckReceiveData(_uartType, ch)) {
 				ParseReceiveData(_uartType, ch);
 				CMD_InitBuffer(_uartType);
 			}
@@ -885,19 +886,19 @@ void InitReceiveDataState()
 	aReceiveDataCount[2] = 0;
 }
 
-bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
+uint8_t CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 {
-	bool bIsReceiveDataDone = false;
-	bool bIsFailedReceiveDataMode = false;
+	uint8_t bIsReceiveDataDone = 0;
+	uint8_t bIsFailedReceiveDataMode = 0;
 	int32_t nFailNum = 0;
-	
+#if 0	
 	switch (gvReceiveMode) {
 	case STATE_RECEIVE_MODE_PLUS:
 		if ('I' == ch) {
 			gvReceiveMode = STATE_RECEIVE_MODE_I;
 		}
 		else {
-			bIsFailedReceiveDataMode = true;
+			bIsFailedReceiveDataMode = 1;
 			nFailNum = 1;
 		}
 		break;
@@ -906,7 +907,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 			gvReceiveMode = STATE_RECEIVE_MODE_P;
 		}
 		else {
-			bIsFailedReceiveDataMode = true;
+			bIsFailedReceiveDataMode = 1;
 			nFailNum = 2;
 		}
 		break;
@@ -915,7 +916,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 			gvReceiveMode = STATE_RECEIVE_MODE_D;
 		}
 		else {
-			bIsFailedReceiveDataMode = true;
+			bIsFailedReceiveDataMode = 1;
 			nFailNum = 3;
 		}
 		break;
@@ -924,7 +925,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 			gvReceiveMode = STATE_RECEIVE_MODE_COMMA1;
 		}
 		else {
-			bIsFailedReceiveDataMode = true;
+			bIsFailedReceiveDataMode = 1;
 			nFailNum = 4;
 		}
 		break;
@@ -934,7 +935,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 			nReceiveChannel = ch - '0';
 		}
 		else {
-			bIsFailedReceiveDataMode = true;
+			bIsFailedReceiveDataMode = 1;
 			nFailNum = 5;
 		}
 		break;
@@ -943,7 +944,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 			gvReceiveMode = STATE_RECEIVE_MODE_COMMA2;
 		}
 		else {
-			bIsFailedReceiveDataMode = true;
+			bIsFailedReceiveDataMode = 1;
 			nFailNum = 6;
 		}
 		break;
@@ -953,7 +954,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 			aReceiveDataCount[0] = ch;
 		}
 		else {
-			bIsFailedReceiveDataMode = true;
+			bIsFailedReceiveDataMode = 1;
 			nFailNum = 7;
 		}
 		break;
@@ -963,7 +964,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 			aReceiveDataCount[1] = ch;
 		}
 		else {
-			bIsFailedReceiveDataMode = true;
+			bIsFailedReceiveDataMode = 1;
 			nFailNum = 8;
 		}
 		break;
@@ -973,7 +974,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 			nTotalReceiveDataCount = atoi((char const *)aReceiveDataCount);
 		}
 		else {
-			bIsFailedReceiveDataMode = true;
+			bIsFailedReceiveDataMode = 1;
 			nFailNum = 9;
 		}
 		break;
@@ -991,7 +992,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 			CMD_PushChar(_uartType, UART_LF);
 			CMD_PushChar(_uartType, 0);
 			
-			bIsReceiveDataDone = true;
+			bIsReceiveDataDone = 1;
 
 			gvReceiveMode = STATE_RECEIVE_MODE_INIT;
 			//nTotalReceiveDataCount = 0;
@@ -1004,7 +1005,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 		break;
 	}
 
-	if (true == bIsFailedReceiveDataMode) {
+	if (1 == bIsFailedReceiveDataMode) {
 		if (1 < nFailNum) {
 			int8_t aBuffer[50];
 			sprintf((char*)aBuffer, "[Error] CheckReceiveData(), nFailNum=%d\r\n", nFailNum);
@@ -1013,6 +1014,7 @@ bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 		
 		InitReceiveDataState();
 	}
+#endif
 
 	return bIsReceiveDataDone;
 }
@@ -1105,11 +1107,11 @@ void ParseReceiveData(UART_TYPE _uartType, uint8_t ch)
 		ClearReconnectCount();
 		SetDelayingToSendCommand(_tick, 10000);
 		EnableWatchDogForSendingData(0, _tick);
-		SetConnectedNTPServer(false);
-		SetConnectedServer(false);
-		SetIdentifiedServer(false);
+		//tConnectedNTPServer(0);
+		SetConnectedServer(0);
+		SetIdentifiedServer(0);
 		SetPingTick(_tick);
-		ResetNTPRetryCount();
+		//setNTPRetryCount();
 		//SetupBlinkLED(0,2000,1);
 		break;
 	case RSP_INIT_UART_OK:
@@ -1183,7 +1185,7 @@ void ParseReceiveData(UART_TYPE _uartType, uint8_t ch)
 		ClearWaitingForResponse();
 		SetDelayingToSendCommand(_tick, 2000);
 		SetNTPTImeTick(_tick);
-		SetConnectedNTPServer(true);
+		SetConnectedNTPServer(1);
 		break;
 
 	case RSP_REQUEST_SEND_NTP_PACKET_OK:
@@ -1212,7 +1214,7 @@ void ParseReceiveData(UART_TYPE _uartType, uint8_t ch)
 		SetState(STATE_IDLE_AP_CONNECTED);
 		ClearWaitingForResponse();
 		SetDelayingToSendCommand(_tick, 1000);
-		SetConnectedNTPServer(false);
+		SetConnectedNTPServer(0);
 		SetNTPTImeTick(_tick);
 		break;
 #endif
@@ -1247,7 +1249,7 @@ void ParseReceiveData(UART_TYPE _uartType, uint8_t ch)
 		SetState(STATE_REQUEST_IDENTIFY_SERVER);
 		ClearWaitingForResponse();
 		SetDelayingToSendCommand(_tick, 2000);
-		SetConnectedServer(true);
+		SetConnectedServer(1);
 		SetPingTick(_tick);
 		break;
 	case RSP_CLOSED_SERVER:
@@ -1255,8 +1257,8 @@ void ParseReceiveData(UART_TYPE _uartType, uint8_t ch)
 		SetState(STATE_IDLE_AP_CONNECTED);
 		ClearWaitingForResponse();
 		SetDelayingToSendCommand(_tick, 2000);
-		SetConnectedServer(false);
-		SetIdentifiedServer(false);
+		SetConnectedServer(0);
+		SetIdentifiedServer(0);
 		SetPingTick(_tick);
 		break;
 	case RSP_REQUEST_IDENTIFY_SERVER_OK:
@@ -1395,16 +1397,16 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 			break;
 #if 1
 		case STATE_IDLE_AP_CONNECTED:
-			if (false == IsConnectedServer()) {
+			if (0 == IsConnectedServer()) {
 				SetState(STATE_CONNECT_SERVER);
 			}
 			break;
 #else
 		case STATE_IDLE_AP_CONNECTED:
-			if (false == IsReadNTP()) {
+			if (0 == IsReadNTP()) {
 				SetState(STATE_CONNECT_NTP_SERVER);
 			}
-			else if (false == IsConnectedServer()) {
+			else if (0 == IsConnectedServer()) {
 				SetState(STATE_CONNECT_SERVER);
 			}
 			break;
@@ -1414,7 +1416,7 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 			SetWaitingForResponse(_tick, 6000);
 			break;
 		case STATE_REQUEST_SEND_NTP_PACKET:
-			if(true == IsExceededNTPReryCount()) {
+			if(1 == IsExceededNTPReryCount()) {
 				SetState(STATE_NOT_INIT);
 			}
 			else {
@@ -1438,7 +1440,7 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 
 				if(curTM.tm_year < 123) {
 					WriteRTCTime(curTM);
-					SetReadNTP(true);
+					SetReadNTP(1);
 
 					SetState(STATE_DISCONNECT_NTP_SERVER);
 				}
@@ -1457,11 +1459,12 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 			SetWaitingForResponse(_tick, 6000);
 			break;
 			
+#if 0			
 		case STATE_GET_NTP_TIME:
 			SendWiFiCommand(CMD_SETUP_SERVER);
 			SetWaitingForResponse(_tick, 2000);
 			break;
-#if 0			
+
 		case STATE_SETUP_SERVER:
 			//SendWiFiCommand(STATE_WAITING_REQUEST);
 			//SetWaitingForResponse(_tick, 6000);
@@ -1473,6 +1476,7 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 			SetWaitingForResponse(_tick, 2000);
 			break;
 
+#if 0			
 		case STATE_SEND_IDENTIFY_SERVER:
 			SendWiFiCommand(CMD_SEND_IDENTIFY_SERVER);
 			SetWaitingForResponse(_tick, 6000);
@@ -1486,7 +1490,7 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 				SetState(STATE_SEND_IDENTIFY_SERVER);
 			}
 			break;
-#if 0			
+
 		///////////////////////////////////////////////////////////////
 		// Funtion 1
 		case STATE_REQUEST_SEND_NTP_TIME_TO_SERVER:
@@ -1541,7 +1545,7 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 				
 				AddReservation(&lrd);
 
-				Light_OnOff(light_id, true);
+				Light_OnOff(light_id, 1);
 
 				int8_t aBuffer[100];
 				sprintf((char*)aBuffer, "Func3, Light=%d, timeRTC=%ld, Duration=%d, aBuffer[1]=%d, aBuffer[2]=%d, aBuffer[3]=%d, aBuffer[4]=%d\r\n",
@@ -1629,11 +1633,12 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 			ESTATE _lastCommand = GetLastCommand();
 
 			switch (_lastCommand) {
+#if 0				
 			case CMD_SEND_NTP_PACKET:	
 				InitReceiveDataState();
 				SetState(STATE_REQUEST_SEND_NTP_PACKET);
 				break;
-
+#endif
 			default:
 				SendWiFiCommand(CMD_RESET);
 				break;

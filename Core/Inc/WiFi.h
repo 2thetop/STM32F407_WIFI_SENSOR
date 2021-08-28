@@ -219,6 +219,7 @@ typedef enum {
 	//RSP_CLOSE_OK=313,
 	//RSP_STATE_OK=315,
 	MAX_RESPONSE_COUNT=11,
+#endif
 
 	STATE_RECEIVE_MODE_INIT=0,
 	STATE_RECEIVE_MODE_PLUS=500,
@@ -231,7 +232,6 @@ typedef enum {
 	STATE_RECEIVE_MODE_LENGTH1,
 	STATE_RECEIVE_MODE_LENGTH2,
 	STATE_RECEIVE_MODE_DATA,
-#endif
 } ESTATE, *PESTATE;
 
 
@@ -293,10 +293,10 @@ typedef struct COMMON_STATE_DATA {
 	uint32_t wifi_command_recoonect_count_;
 	uint32_t wifi_command_recoonect_count_limit_;
 
-	//bool 	ntp_server_connected_;
-	//bool 	ntp_read_;
-	bool 	server_connected_;
-	bool 	server_identified_;
+	//uint8_t 	ntp_server_connected_;
+	//uint8_t 	ntp_read_;
+	uint8_t 	server_connected_;
+	uint8_t 	server_identified_;
 	
 	//uint32_t ntp_retry_count_;
 	//uint32_t max_ntp_retry_count_;
@@ -318,8 +318,15 @@ typedef struct LINK_STATE_DATA {
 	int 	nReceiveChannel;
 	uint8_t aReceiveDataCount[3];
 
-	TCPD	gTCPD;
+	//TCPD	gTCPD;
 } LSD, *PLSD;
+
+
+typedef struct st_AP_INFO {
+	uint8_t szSSID[64];
+	uint8_t szPassword[64];
+	uint32_t portNum;
+} APINFO, *PAPINFO;
 
 
 
@@ -327,7 +334,7 @@ typedef struct LINK_STATE_DATA {
 
 uint32_t WiFi_ParsingProc(UART_TYPE _uartType, uint8_t ch);
 void InitReceiveDataState();
-bool CheckReceiveData(UART_TYPE _uartType, uint8_t ch);
+uint8_t CheckReceiveData(UART_TYPE _uartType, uint8_t ch);
 void DumpCmdPack(UART_TYPE _uartType, int8_t *line, uint32_t count);
 void ParseReceiveData(UART_TYPE _uartType, uint8_t ch);
 
@@ -362,26 +369,26 @@ void ResetWatchDogForSendingData(uint32_t _tick);
 uint32_t IsExpiredWatchDogForSendingData(uint32_t _tick);
 uint32_t IsResendSensorData(void);
 #if 0
-bool IsReadNTP();
-void SetReadNTP(bool _ntp_read);
+uint8_t IsReadNTP();
+void SetReadNTP(uint8_t _ntp_read);
 
 void SetNTPTImeTick(uint32_t _tick);
-bool IsExpiredNTPTImeTick(uint32_t _tick);
-bool CheckReceivedNTPTIme(uint32_t _tick);
+uint8_t IsExpiredNTPTImeTick(uint32_t _tick);
+uint8_t CheckReceivedNTPTIme(uint32_t _tick);
 
 void ResetNTPRetryCount();
 void IncreaseNTPRetryCount();
-bool IsExceededNTPReryCount();
+uint8_t IsExceededNTPReryCount();
 #endif
 
-bool IsConnectedServer();
-void SetConnectedServer(bool _server_connected);
-bool IsIdentifiedServer();
-void SetIdentifiedServer(bool _server_identified);
+uint8_t IsConnectedServer();
+void SetConnectedServer(uint8_t _server_connected);
+uint8_t IsIdentifiedServer();
+void SetIdentifiedServer(uint8_t _server_identified);
 
 void SetPingTick(uint32_t _tick);
-bool IsExpiredPingTick(uint32_t _tick);
-bool CheckConnectingServer(uint32_t _tick);
+uint8_t IsExpiredPingTick(uint32_t _tick);
+uint8_t CheckConnectingServer(uint32_t _tick);
 
 void SendWiFiCommand(ESTATE _state);
 
@@ -396,7 +403,7 @@ int32_t CompareSSID(int8_t*);
 void ConnectAP(int8_t const *pszSSID, int8_t const *pszPassword);
 void CheckIPAddress();
 
-#fi 0
+#if 0
 // NTP Server Function
 void ConnectNTPServer(int8_t *pNTP);
 void RequestSendNTPPacket();
@@ -454,6 +461,7 @@ void SendFuntion5Response(uint8_t resp);
 #define ntohl(a)    htonl((a))
 #endif 
 
+#if 0
 #define NTP_OFFSET                          2208988800ULL
 #define SEOUL_TIMEZONE_OFFSET				(9 * 60 * 60)
 
@@ -465,6 +473,8 @@ void MakeTM(struct tm* pTM, NUD *pNUD);
 
 void ConvertNTPTimeToString(uint8_t *pstrTime, NUD *pNUD);
 void SaveRTCWithNTPTime(NUD *pNUD);
+
+#endif
 
 /* USER CODE END Prototypes */
 

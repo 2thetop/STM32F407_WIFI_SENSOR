@@ -26,8 +26,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "WiFi.h"
 #include "LedBlink.h"
+#include "usbd_cdc_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,12 +41,8 @@
 #define WHITE_LED_ON					0
 #define BLINK_WHITE_LED_INTERVAL		500
 
-typedef struct st_AP_INFO {
-	uint8_t szSSID[64];
-	uint8_t szPassword[64];
-	uint32_t portNum;
-} APINFO, *PAPINFO;
 /* USER CODE END PD */
+
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
@@ -66,10 +63,15 @@ uint32_t blink_white_led_tick_ = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+
 /* USER CODE BEGIN PFP */
+uint32_t GetBoardID();
+
 void BlinkWhiteLED(uint32_t _current_tick);
 void CheckSwitchLED();
-uint32_t GetBoardID();
+void CheckCDC(uint32_t _current_tick);
+
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -93,49 +95,49 @@ int main(void)
 	uint32_t current_tick_ = 0;
 	//uint32_t display_time_tick_ = 0;
 	//uint32_t check_reservation_tick_ = 0;
-	uint32_t test_cdc_tick_ = 0;
 
-  /* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+	/* USER CODE END 1 */
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	/* MCU Configuration--------------------------------------------------------*/
 
-  /* USER CODE BEGIN Init */
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
 
-  /* USER CODE END Init */
+	/* USER CODE BEGIN Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+	/* USER CODE END Init */
 
-  /* USER CODE BEGIN SysInit */
+	/* Configure the system clock */
+	SystemClock_Config();
 
-  /* USER CODE END SysInit */
+	/* USER CODE BEGIN SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_TIM4_Init();
+	/* USER CODE END SysInit */
 
-  MX_UART4_Init();
-  MX_UART5_Init();
-  MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
-  MX_USART3_UART_Init();
-  MX_USART6_UART_Init();
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_TIM4_Init();
 
-  MX_USB_DEVICE_Init();
+	MX_UART4_Init();
+	MX_UART5_Init();
+	MX_USART1_UART_Init();
+	MX_USART2_UART_Init();
+	MX_USART3_UART_Init();
+	MX_USART6_UART_Init();
 
-  /* USER CODE BEGIN 2 */
-  UART_Init();
-  
-  HAL_GPIO_WritePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(LED3_BLUE_GPIO_Port, LED3_BLUE_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(LED4_YELLOW_GPIO_Port, LED4_YELLOW_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(LED5_GREEN_GPIO_Port, LED5_GREEN_Pin, GPIO_PIN_SET);
+	MX_USB_DEVICE_Init();
 
-  HAL_TIM_Base_Start_IT(&htim4);
+	/* USER CODE BEGIN 2 */
+	UART_Init();
+
+	HAL_GPIO_WritePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED3_BLUE_GPIO_Port, LED3_BLUE_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED4_YELLOW_GPIO_Port, LED4_YELLOW_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED5_GREEN_GPIO_Port, LED5_GREEN_Pin, GPIO_PIN_SET);
+
+	HAL_TIM_Base_Start_IT(&htim4);
 
 #if 1
 	board_id_ = GetBoardID();
@@ -169,38 +171,29 @@ int main(void)
 
 
 
-  while (1)
-  {
-	  current_tick_ = HAL_GetTick();
-
-#if WHITE_LED_ON
-	  BlinkWhiteLED(current_tick_);
-#endif
+	while (1)
+	{
+		current_tick_ = HAL_GetTick();
 
 #if 1
-      UART_RX_DefaultProc();
-      UART_TX_DefaultProc();
+		UART_RX_DefaultProc();
+		UART_TX_DefaultProc();
 #endif
-    /* USER CODE END WHILE */
+		/* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+		/* USER CODE BEGIN 3 */
 
-#if 0
-      if ((current_tick_ - test_cdc_tick_) > 10) {
-    	  test_cdc_tick_ = current_tick_;
-    	  uint8_t buffer[100] = "CDC test string...\r\n";
-    	  uint16_t string_length = 21;
-    	  CDC_Transmit_FS(buffer, string_length);
-      }
-#endif
+		WiFi_DefaultProc(current_tick_);
 
-#if 0
-      CheckSwitchLED();
-#endif
-  }
+		//CheckCDC(current_tick_);
+		//CheckSwitchLED();
+		//BlinkWhiteLED(current_tick_);
+
+		CheckConnectingServer(current_tick_);	
 
 		BlinkLED(&lbpPowerLED, current_tick_);
 		BlinkLED(&lbpStatusLED, current_tick_);	
+	}
   /* USER CODE END 3 */
 }
 
@@ -210,44 +203,69 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** Configure the main internal regulator output voltage
-  */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 168;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 7;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+	/** Configure the main internal regulator output voltage
+	*/
+	__HAL_RCC_PWR_CLK_ENABLE();
+	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+	/** Initializes the RCC Oscillators according to the specified parameters
+	* in the RCC_OscInitTypeDef structure.
+	*/
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+	RCC_OscInitStruct.PLL.PLLM = 4;
+	RCC_OscInitStruct.PLL.PLLN = 168;
+	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+	RCC_OscInitStruct.PLL.PLLQ = 7;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	/** Initializes the CPU, AHB and APB buses clocks
+	*/
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+	                          |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+	{
+		Error_Handler();
+	}
 }
 
 /* USER CODE BEGIN 4 */
+
+uint32_t GetBoardID()
+{
+	uint32_t _board_id = 0;
+
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW1_GPIO_Port, DIP_SW1_Pin)) {
+		_board_id |= 0x01;
+	}
+
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW2_GPIO_Port, DIP_SW2_Pin)) {
+		_board_id |= 0x02;
+	}
+
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW3_GPIO_Port, DIP_SW3_Pin)) {
+		_board_id |= 0x04;
+	}
+
+	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW4_GPIO_Port, DIP_SW4_Pin)) {
+		_board_id |= 0x08;
+	}
+
+	return _board_id;
+}
+
+
 void BlinkWhiteLED(uint32_t _current_tick)
 {
 	if (BLINK_WHITE_LED_INTERVAL < (_current_tick - blink_white_led_tick_)) {
@@ -306,27 +324,16 @@ void CheckSwitchLED()
 	}
 }
 
-uint32_t GetBoardID()
+void CheckCDC(uint32_t _current_tick)
 {
-	uint32_t _board_id = 0;
+	static uint32_t test_cdc_tick_ = 0;
 
-	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW1_GPIO_Port, DIP_SW1_Pin)) {
-		_board_id |= 0x01;
+	if ((_current_tick - test_cdc_tick_) > 10) {
+		test_cdc_tick_ = _current_tick;
+		uint8_t buffer[100] = "CDC test string...\r\n";
+		uint16_t string_length = 21;
+		CDC_Transmit_FS(buffer, string_length);
 	}
-
-	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW2_GPIO_Port, DIP_SW2_Pin)) {
-		_board_id |= 0x02;
-	}
-
-	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW3_GPIO_Port, DIP_SW3_Pin)) {
-		_board_id |= 0x04;
-	}
-
-	if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(DIP_SW4_GPIO_Port, DIP_SW4_Pin)) {
-		_board_id |= 0x08;
-	}
-
-	return _board_id;
 }
 
 /* USER CODE END 4 */
