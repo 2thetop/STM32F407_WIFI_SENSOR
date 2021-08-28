@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "LedBlink.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -83,6 +84,12 @@ uint32_t GetBoardID();
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	LBP	lbpPowerLED;
+	LBP	lbpStatusLED;
+	LBP	lbpWiFiLED;
+	LBP	lbpUartLED;
+	LBP	lbpDebugLED;
+	
 	uint32_t current_tick_ = 0;
 	//uint32_t display_time_tick_ = 0;
 	//uint32_t check_reservation_tick_ = 0;
@@ -131,21 +138,29 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim4);
 
 #if 1
-  board_id_ = GetBoardID();
+	board_id_ = GetBoardID();
 
-  //////////////////////////////////////////////////////////////////////////////////////
-  // UART ????????? ?????????.
-  HAL_UART_Receive_IT(&huart1, &gUarts[UART_ESP12].rxChar, 1);
-  HAL_UART_Receive_IT(&huart2, &gUarts[UART_TEMP_HUM].rxChar, 1);
-  HAL_UART_Receive_IT(&huart3, &gUarts[UART_TENSIOIN].rxChar, 1);
-  HAL_UART_Receive_IT(&huart4, &gUarts[UART_UV].rxChar, 1);
-  HAL_UART_Receive_IT(&huart5, &gUarts[UART_DUST].rxChar, 1);
-  HAL_UART_Receive_IT(&huart6, &gUarts[UART_VIBRATION].rxChar, 1);
+    //////////////////////////////////////////////////////////////////////////////////////
+	// 상태 표시를 위한 LED를 Blink 설정을 함.
+	InitBlinkLLED(&lbpPowerLED, LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
+	SetupBlinkLED(&lbpPowerLED, 1, 1000, 2);
 
-  //////////////////////////////////////////////////////////////////////////////////////
-  // WiFi Module??? 초기??? ???.
-  HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
-  //////////////////////////////////////////////////////////////////////////////////////
+	InitBlinkLLED(&lbpStatusLED, LED3_BLUE_GPIO_Port, LED3_BLUE_Pin);
+	SetupBlinkLED(&lbpStatusLED, 1, 1000, 6);
+
+	//////////////////////////////////////////////////////////////////////////////////////
+	// UART ????????? ?????????.
+	HAL_UART_Receive_IT(&huart1, &gUarts[UART_ESP12].rxChar, 1);
+	HAL_UART_Receive_IT(&huart2, &gUarts[UART_TEMP_HUM].rxChar, 1);
+	HAL_UART_Receive_IT(&huart3, &gUarts[UART_TENSIOIN].rxChar, 1);
+	HAL_UART_Receive_IT(&huart4, &gUarts[UART_UV].rxChar, 1);
+	HAL_UART_Receive_IT(&huart5, &gUarts[UART_DUST].rxChar, 1);
+	HAL_UART_Receive_IT(&huart6, &gUarts[UART_VIBRATION].rxChar, 1);
+
+	//////////////////////////////////////////////////////////////////////////////////////
+	// WiFi Module??? 초기??? ???.
+	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
+	//////////////////////////////////////////////////////////////////////////////////////
 #endif
   /* USER CODE END 2 */
 
@@ -183,6 +198,9 @@ int main(void)
       CheckSwitchLED();
 #endif
   }
+
+		BlinkLED(&lbpPowerLED, current_tick_);
+		BlinkLED(&lbpStatusLED, current_tick_);	
   /* USER CODE END 3 */
 }
 
