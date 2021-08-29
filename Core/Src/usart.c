@@ -889,7 +889,8 @@ void HAL_UART_BypassTest(void)
 	PUART_Q pUartQ2;
 
 	pUartQ1 = &gUarts[UART_ESP12];
-	pUartQ2 = &gUarts[UART_DEBUG];
+	//pUartQ2 = &gUarts[UART_DEBUG];
+	pUartQ2 = &gUarts[UART_VIBRATION];
 
 	if(0 == pUartQ2->isTransmitting) {
 		uint32_t _receiveCount = CQ_GetDataCount(&pUartQ1->rxQ);
