@@ -622,18 +622,26 @@ void UART_RX_DefaultProc(void)
 	uint32_t _receiveCount;
 	uint8_t _ch;
     uint8_t buffer[100];
+	uint32_t _string_length = 0;
     
 	pUartQ = &gUarts[UART_ESP12];
 	PCQ_BUFFER pRxQ = &pUartQ->rxQ;
 
 	if(0 == CQ_IsEmpty(pRxQ)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
-		printf("UART_ESP12: _receiveCount=%d", _receiveCount);
+
+		//sprintf(buffer, "UART_ESP12: _receiveCount=%d", _receiveCount);
+		//_string_length = strlen(buffer);		
+		
 		for(uint32_t j=0; j<_receiveCount; j++) {
 			CQ_PopChar(pRxQ, &_ch);
-			UartChar(UART_DEBUG, _ch);
-			//WiFi_ParsingProc(UART_ESP12, _ch);
-			putchar(_ch);
+			WiFi_ParsingProc(UART_ESP12, _ch);
+
+			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;       			
+			if (UART_CR == _ch) {
+				CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
+				pUartQ->bufferIndex = 0;
+			}
 		}
 	}
 
@@ -694,7 +702,7 @@ void UART_RX_DefaultProc(void)
 			CQ_PopChar(pRxQ, &_ch);
 			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;       			
 
-			if (0x0A == _ch) {
+			if (UART_CR == _ch) {
 				CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
 				pUartQ->bufferIndex = 0;
 			}

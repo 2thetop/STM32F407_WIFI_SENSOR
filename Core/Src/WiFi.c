@@ -144,137 +144,137 @@ static uint8_t aReceiveDataCount[3] = { 0 };
 //static TCPD	gTCPD;
 
 
-CSD	csd;
-LSD aLSD[4];
+WSD	wsd;
+SSD aSSD[4];
 
 //NUD	nud;
 
 
 void InitWiFi()
 {
-	InitCSD(&csd);
+	InitWSD(&wsd);
 
-	InitLSD(&aLSD[0]);
-	InitLSD(&aLSD[1]);
-	InitLSD(&aLSD[2]);
-	InitLSD(&aLSD[3]);
+	InitSSD(&aSSD[0]);
+	InitSSD(&aSSD[1]);
+	InitSSD(&aSSD[2]);
+	InitSSD(&aSSD[3]);
 }
 
 
-void InitCSD(PCSD pCSD)
+void InitWSD(PWSD pWSD)
 {
-	pCSD->state_ = STATE_NOT_INIT;
+	pWSD->state_ = STATE_NOT_INIT;
 	
-	pCSD->last_sent_command_ = CMD_NONE;
+	pWSD->last_sent_command_ = CMD_NONE;
 	
-	pCSD->watchdog_send_interval_ = DATA_SEND_TIMEOUT_INTERVAL;
-	pCSD->last_watchdog_send_tick_ = 0;
-	pCSD->is_set_watchdog_send_ = 0;
-	pCSD->is_enabled_watchdog_send_ = 0;
+	pWSD->watchdog_send_interval_ = DATA_SEND_TIMEOUT_INTERVAL;
+	pWSD->last_watchdog_send_tick_ = 0;
+	pWSD->is_set_watchdog_send_ = 0;
+	pWSD->is_enabled_watchdog_send_ = 0;
 	
-	pCSD->is_waiting_wifi_response_ = 0;
-	pCSD->wifi_command_interval_ = 10000;
-	pCSD->last_wifi_command_tick_ = 0;
-	pCSD->wifi_command_retry_count_ = 0;
-	pCSD->wifi_command_retry_count_limit_ = 5;
+	pWSD->is_waiting_wifi_response_ = 0;
+	pWSD->wifi_command_interval_ = 10000;
+	pWSD->last_wifi_command_tick_ = 0;
+	pWSD->wifi_command_retry_count_ = 0;
+	pWSD->wifi_command_retry_count_limit_ = 5;
 	
-	pCSD->is_delaying_wifi_command_ = 0;
-	pCSD->wifi_command_delay_ = 5000;
-	pCSD->wifi_command_delay_tick_ = 0;
+	pWSD->is_delaying_wifi_command_ = 0;
+	pWSD->wifi_command_delay_ = 5000;
+	pWSD->wifi_command_delay_tick_ = 0;
 	
-	pCSD->wifi_command_recoonect_count_ = 0;
-	pCSD->wifi_command_recoonect_count_limit_ = 5;
+	pWSD->wifi_command_recoonect_count_ = 0;
+	pWSD->wifi_command_recoonect_count_limit_ = 5;
 
-	//pCSD->ntp_server_connected_ = 0;
-	//pCSD->ntp_read_ = 0;
+	//pWSD->ntp_server_connected_ = 0;
+	//pWSD->ntp_read_ = 0;
 	
-	pCSD->server_connected_ = 0;
-	pCSD->server_identified_ = 0;
+	pWSD->server_connected_ = 0;
+	pWSD->server_identified_ = 0;
 
-	//pCSD->ntp_retry_count_ = 0;
-	//pCSD->max_ntp_retry_count_ = 5;
+	//pWSD->ntp_retry_count_ = 0;
+	//pWSD->max_ntp_retry_count_ = 5;
 
-	//pCSD->last_ntp_time_tick_ = 0;
-	//pCSD->max_ntp_time_tick_ = 10 * 1000;
+	//pWSD->last_ntp_time_tick_ = 0;
+	//pWSD->max_ntp_time_tick_ = 10 * 1000;
 
-	pCSD->last_ping_tick_ = 0;
-	pCSD->max_ping_tick_ = 60 * 1000;
+	pWSD->last_ping_tick_ = 0;
+	pWSD->max_ping_tick_ = 60 * 1000;
 }
 
-void InitLSD(PLSD pLSD)
+void InitSSD(PSSD pSSD)
 {
-	pLSD->csd.state_ = STATE_NOT_INIT;
+	pSSD->wsd.state_ = STATE_NOT_INIT;
 	
-	pLSD->csd.last_sent_command_ = CMD_NONE;
+	pSSD->wsd.last_sent_command_ = CMD_NONE;
 	
-	pLSD->csd.watchdog_send_interval_ = DATA_SEND_TIMEOUT_INTERVAL;
-	pLSD->csd.last_watchdog_send_tick_ = 0;
-	pLSD->csd.is_set_watchdog_send_ = 0;
-	pLSD->csd.is_enabled_watchdog_send_ = 0;	
+	pSSD->wsd.watchdog_send_interval_ = DATA_SEND_TIMEOUT_INTERVAL;
+	pSSD->wsd.last_watchdog_send_tick_ = 0;
+	pSSD->wsd.is_set_watchdog_send_ = 0;
+	pSSD->wsd.is_enabled_watchdog_send_ = 0;	
 	
-	pLSD->csd.is_waiting_wifi_response_ = 0;
-	pLSD->csd.wifi_command_interval_ = 10000;
-	pLSD->csd.last_wifi_command_tick_ = 0;
-	pLSD->csd.wifi_command_retry_count_ = 0;
-	pLSD->csd.wifi_command_retry_count_limit_ = 5;
+	pSSD->wsd.is_waiting_wifi_response_ = 0;
+	pSSD->wsd.wifi_command_interval_ = 10000;
+	pSSD->wsd.last_wifi_command_tick_ = 0;
+	pSSD->wsd.wifi_command_retry_count_ = 0;
+	pSSD->wsd.wifi_command_retry_count_limit_ = 5;
 	
-	pLSD->csd.is_delaying_wifi_command_ = 0;
-	pLSD->csd.wifi_command_delay_ = 5000;
-	pLSD->csd.wifi_command_delay_tick_ = 0;
+	pSSD->wsd.is_delaying_wifi_command_ = 0;
+	pSSD->wsd.wifi_command_delay_ = 5000;
+	pSSD->wsd.wifi_command_delay_tick_ = 0;
 	
-	pLSD->csd.wifi_command_recoonect_count_ = 0;
-	pLSD->csd.wifi_command_recoonect_count_limit_ = 5;
+	pSSD->wsd.wifi_command_recoonect_count_ = 0;
+	pSSD->wsd.wifi_command_recoonect_count_limit_ = 5;
 
-	pLSD->gvReceiveMode = STATE_RECEIVE_MODE_INIT;
-	pLSD->nTotalReceiveDataCount = 0;
-	pLSD->nCurrentReceiveDataCount = 0;
-	pLSD->nReceiveChannel = 0;
-	pLSD->aReceiveDataCount[0] = 0;
-	pLSD->aReceiveDataCount[1] = 0;
-    pLSD->aReceiveDataCount[2] = 0;
-	//pLSD->gTCPD;
+	pSSD->gvReceiveMode = STATE_RECEIVE_MODE_INIT;
+	pSSD->nTotalReceiveDataCount = 0;
+	pSSD->nCurrentReceiveDataCount = 0;
+	pSSD->nReceiveChannel = 0;
+	pSSD->aReceiveDataCount[0] = 0;
+	pSSD->aReceiveDataCount[1] = 0;
+    pSSD->aReceiveDataCount[2] = 0;
+	//pSSD->gTCPD;
 }
 
 ESTATE GetState(void) 
 {
-	return csd.state_;
+	return wsd.state_;
 }
 
 void SetState(ESTATE _state)
 {
-	csd.state_ = _state;
+	wsd.state_ = _state;
 }
 
 ESTATE GetLastCommand() 
 {
-	return csd.last_sent_command_;
+	return wsd.last_sent_command_;
 }
 
 void SetLastCommand(ESTATE _last_command)
 {
-	csd.last_sent_command_ = _last_command;
+	wsd.last_sent_command_ = _last_command;
 }
 
 uint32_t IsDelayingToSendCommand(void)
 {
-	return csd.is_delaying_wifi_command_;
+	return wsd.is_delaying_wifi_command_;
 }
 
 void SetDelayingToSendCommand(uint32_t _tick, uint32_t _delay)
 {
-	csd.is_delaying_wifi_command_ = 1;
-	csd.wifi_command_delay_tick_ = _tick;
-	csd.wifi_command_delay_ = _delay;
+	wsd.is_delaying_wifi_command_ = 1;
+	wsd.wifi_command_delay_tick_ = _tick;
+	wsd.wifi_command_delay_ = _delay;
 }
 
 uint32_t CheckReadyToSendCommand(uint32_t _tick)
 {	
 	uint32_t _is_ready_to_send_command = 0;
 	
-	if(csd.wifi_command_delay_ <= (_tick - csd.wifi_command_delay_tick_)) {
-		csd.is_delaying_wifi_command_ = 0;
-		csd.wifi_command_delay_ = 1000;
-		csd.wifi_command_delay_tick_ = _tick;
+	if(wsd.wifi_command_delay_ <= (_tick - wsd.wifi_command_delay_tick_)) {
+		wsd.is_delaying_wifi_command_ = 0;
+		wsd.wifi_command_delay_ = 1000;
+		wsd.wifi_command_delay_tick_ = _tick;
 		_is_ready_to_send_command = 1;
 	}
 
@@ -283,32 +283,32 @@ uint32_t CheckReadyToSendCommand(uint32_t _tick)
 
 uint32_t IsWaitingForResponse(void)
 {
-	return csd.is_waiting_wifi_response_;
+	return wsd.is_waiting_wifi_response_;
 }
 
 void ClearWaitingForResponse(void)
 {
-	csd.is_waiting_wifi_response_ = 0;
+	wsd.is_waiting_wifi_response_ = 0;
 }
 
 void SetWaitingForResponse(uint32_t _tick, uint32_t _interval)
 {
-	csd.is_waiting_wifi_response_ = 1;
+	wsd.is_waiting_wifi_response_ = 1;
 
-	csd.last_wifi_command_tick_ = _tick;
-	csd.wifi_command_interval_ = _interval;
-	csd.wifi_command_retry_count_ = 0;
-	csd.wifi_command_retry_count_limit_ = 3;
+	wsd.last_wifi_command_tick_ = _tick;
+	wsd.wifi_command_interval_ = _interval;
+	wsd.wifi_command_retry_count_ = 0;
+	wsd.wifi_command_retry_count_limit_ = 3;
 }
 
 uint32_t IsExpiredWaitingForResponse(uint32_t _tick)
 {	
 	uint32_t _is_expired = 0;
 	
-	if(csd.wifi_command_interval_ <= (_tick - csd.last_wifi_command_tick_)) {
-		csd.last_wifi_command_tick_ = _tick;
-		csd.wifi_command_retry_count_++;
-		if(csd.wifi_command_retry_count_limit_ <= csd.wifi_command_retry_count_) {
+	if(wsd.wifi_command_interval_ <= (_tick - wsd.last_wifi_command_tick_)) {
+		wsd.last_wifi_command_tick_ = _tick;
+		wsd.wifi_command_retry_count_++;
+		if(wsd.wifi_command_retry_count_limit_ <= wsd.wifi_command_retry_count_) {
 			_is_expired = 1;
 		}
 	}
@@ -318,20 +318,20 @@ uint32_t IsExpiredWaitingForResponse(uint32_t _tick)
 
 void ClearReconnectCount() 
 {  
-	csd.wifi_command_recoonect_count_ = 0;
-	csd.wifi_command_recoonect_count_limit_ = 5;
+	wsd.wifi_command_recoonect_count_ = 0;
+	wsd.wifi_command_recoonect_count_limit_ = 5;
 }
 
 void IncreaseReconnectCount() 
 {
-	csd.wifi_command_recoonect_count_++;
+	wsd.wifi_command_recoonect_count_++;
 }
 
 uint32_t IsExpiredWaitingForReconnect()
 {
 	uint32_t _is_expired = 0;
 	
-	if(csd.wifi_command_recoonect_count_limit_ <= csd.wifi_command_recoonect_count_) {
+	if(wsd.wifi_command_recoonect_count_limit_ <= wsd.wifi_command_recoonect_count_) {
 		_is_expired= 1;
 	}
 
@@ -340,29 +340,29 @@ uint32_t IsExpiredWaitingForReconnect()
 
 void EnableWatchDogForSendingData(uint32_t _enable, uint32_t _tick)
 {
-	csd.is_enabled_watchdog_send_ = _enable;
-	csd.watchdog_send_interval_ = DATA_SEND_TIMEOUT_INTERVAL;
-	csd.last_watchdog_send_tick_ = _tick;
-	csd.is_set_watchdog_send_ = 0;
+	wsd.is_enabled_watchdog_send_ = _enable;
+	wsd.watchdog_send_interval_ = DATA_SEND_TIMEOUT_INTERVAL;
+	wsd.last_watchdog_send_tick_ = _tick;
+	wsd.is_set_watchdog_send_ = 0;
 }
 
 void ResetWatchDogForSendingData(uint32_t _tick)
 {
-	csd.watchdog_send_interval_ = DATA_SEND_TIMEOUT_INTERVAL;
-	csd.last_watchdog_send_tick_ = _tick;
-	csd.is_set_watchdog_send_ = 0;
+	wsd.watchdog_send_interval_ = DATA_SEND_TIMEOUT_INTERVAL;
+	wsd.last_watchdog_send_tick_ = _tick;
+	wsd.is_set_watchdog_send_ = 0;
 }
 
 uint32_t IsExpiredWatchDogForSendingData(uint32_t _tick)
 {
 	uint32_t _is_expired_watchdog_send = 0;
 	
-	if(1 == csd.is_enabled_watchdog_send_) {
-		if(csd.watchdog_send_interval_ <= (_tick - csd.last_watchdog_send_tick_)) { 		
-			csd.last_watchdog_send_tick_ = _tick; 
+	if(1 == wsd.is_enabled_watchdog_send_) {
+		if(wsd.watchdog_send_interval_ <= (_tick - wsd.last_watchdog_send_tick_)) { 		
+			wsd.last_watchdog_send_tick_ = _tick; 
 		
 			// 마지막 데이터 패킷을 보냄
-			csd.is_set_watchdog_send_ = 1;
+			wsd.is_set_watchdog_send_ = 1;
 			_is_expired_watchdog_send = 1;
 		}
 	}
@@ -371,38 +371,38 @@ uint32_t IsExpiredWatchDogForSendingData(uint32_t _tick)
 
 uint32_t IsResendSensorData(void)
 {
-	return csd.is_set_watchdog_send_;
+	return wsd.is_set_watchdog_send_;
 }
 
 #if 0
 uint8_t IsConnectedNTPServer() 
 {
-	return csd.ntp_server_connected_;
+	return wsd.ntp_server_connected_;
 }
 
 void SetConnectedNTPServer(uint8_t _connected)
 {
-	csd.ntp_server_connected_ = _connected;
+	wsd.ntp_server_connected_ = _connected;
 }
 
 uint8_t IsReadNTP() 
 {
-	return csd.ntp_read_;
+	return wsd.ntp_read_;
 }
 
 void SetReadNTP(uint8_t _ntp_read)
 {
-	csd.ntp_read_ = _ntp_read;
+	wsd.ntp_read_ = _ntp_read;
 }
 
 void SetNTPTImeTick(uint32_t _tick)	
 {
-	csd.last_ntp_time_tick_ = _tick;
+	wsd.last_ntp_time_tick_ = _tick;
 }
 
 uint8_t IsExpiredNTPTImeTick(uint32_t _tick)
 {
-	return ((csd.last_ntp_time_tick_ + csd.max_ntp_time_tick_) <= _tick);
+	return ((wsd.last_ntp_time_tick_ + wsd.max_ntp_time_tick_) <= _tick);
 }
 
 uint8_t CheckReceivedNTPTIme(uint32_t _tick)
@@ -429,48 +429,48 @@ uint8_t CheckReceivedNTPTIme(uint32_t _tick)
 
 void ResetNTPRetryCount()
 {
-	csd.ntp_retry_count_ = 0;
+	wsd.ntp_retry_count_ = 0;
 }
 
 void IncreaseNTPRetryCount()
 {
-	csd.ntp_retry_count_++;
+	wsd.ntp_retry_count_++;
 }
 
 uint8_t IsExceededNTPReryCount()
 {
-	return (csd.max_ntp_retry_count_ <= csd.ntp_retry_count_);
+	return (wsd.max_ntp_retry_count_ <= wsd.ntp_retry_count_);
 }
 #endif
 
 uint8_t IsConnectedServer() 
 {
-	return csd.server_connected_;
+	return wsd.server_connected_;
 }
 
 void SetConnectedServer(uint8_t _server_connected)
 {
-	csd.server_connected_ = _server_connected;
+	wsd.server_connected_ = _server_connected;
 }
 
 uint8_t IsIdentifiedServer()
 {
-	return csd.server_identified_;
+	return wsd.server_identified_;
 }
 
 void SetIdentifiedServer(uint8_t _server_identified)
 {
-	csd.server_identified_ = _server_identified;
+	wsd.server_identified_ = _server_identified;
 }
 
 void SetPingTick(uint32_t _tick)
 {
-	csd.last_ping_tick_ = _tick;
+	wsd.last_ping_tick_ = _tick;
 }
 
 uint8_t IsExpiredPingTick(uint32_t _tick)
 {
-	return ((csd.last_ping_tick_ + csd.max_ping_tick_) <= _tick);
+	return ((wsd.last_ping_tick_ + wsd.max_ping_tick_) <= _tick);
 }
 
 uint8_t CheckConnectingServer(uint32_t _tick)
@@ -1368,7 +1368,7 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 		switch(_state) {
 		case STATE_NOT_INIT:
 			SendWiFiCommand(CMD_RESET);
-			csd.is_waiting_wifi_response_ = 1;
+			wsd.is_waiting_wifi_response_ = 1;
 			SetWaitingForResponse(_tick, RESET_COMMAND_WAIT_TIMEOUT);
 			break;
 		case STATE_INIT_UART:
@@ -1644,8 +1644,8 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 				break;
 			}
 
-			csd.is_waiting_wifi_response_ = 0;
-			csd.last_wifi_command_tick_ = _tick;
+			wsd.is_waiting_wifi_response_ = 0;
+			wsd.last_wifi_command_tick_ = _tick;
 		}
 	}
 

@@ -268,7 +268,7 @@ typedef struct {
 #define SETMODE_COMMAND_WAIT_TIMEOUT		3000
 
 
-typedef struct COMMON_STATE_DATA {
+typedef struct WIFI_STATE_DATA {
 
 	ESTATE 	state_;
 
@@ -306,11 +306,11 @@ typedef struct COMMON_STATE_DATA {
 	
 	uint32_t last_ping_tick_;
 	uint32_t max_ping_tick_;
-} CSD, *PCSD;
+} WSD, *PWSD;
 
 
-typedef struct LINK_STATE_DATA {
-	CSD		csd;
+typedef struct SERVER_STATE_DATA {
+	WSD		wsd;
 	
 	ESTATE 	gvReceiveMode;
 	int 	nTotalReceiveDataCount;
@@ -319,7 +319,7 @@ typedef struct LINK_STATE_DATA {
 	uint8_t aReceiveDataCount[3];
 
 	//TCPD	gTCPD;
-} LSD, *PLSD;
+} SSD, *PSSD;
 
 
 typedef struct st_AP_INFO {
@@ -343,8 +343,8 @@ uint32_t WiFi_DefaultProc(uint32_t _tick);
 
 void InitWiFi();
 
-void InitCSD(PCSD pCSD);
-void InitLSD(PLSD pLSD);
+void InitWSD(PWSD pWSD);
+void InitSSD(PSSD pSSD);
 
 ESTATE GetMode(void); 
 void SetMode(ESTATE _state);

@@ -85,7 +85,7 @@ void CheckCDC(uint32_t _current_tick);
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
+	/* USER CODE BEGIN 1 */
 	LBP	lbpPowerLED;
 	LBP	lbpStatusLED;
 	LBP	lbpWiFiLED;
@@ -162,6 +162,7 @@ int main(void)
 	//////////////////////////////////////////////////////////////////////////////////////
 	// WiFi Module??? 초기??? ???.
 	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
+	//HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
 	//////////////////////////////////////////////////////////////////////////////////////
 #endif
   /* USER CODE END 2 */
@@ -191,8 +192,8 @@ int main(void)
 
 		CheckConnectingServer(current_tick_);	
 
-		BlinkLED(&lbpPowerLED, current_tick_);
-		BlinkLED(&lbpStatusLED, current_tick_);	
+		//BlinkLED(&lbpPowerLED, current_tick_);
+		//BlinkLED(&lbpStatusLED, current_tick_);	
 	}
   /* USER CODE END 3 */
 }
