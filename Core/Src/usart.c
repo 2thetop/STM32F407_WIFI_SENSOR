@@ -834,10 +834,16 @@ uint32_t UartPuts(UART_TYPE ut, const int8_t *str, int32_t len)
 		_copyCount = (len < _freeCount) ? len:_freeCount;
 
 		CQ_PushString(pQ,(uint8_t*)str,_copyCount);
-
+#if 0
 		if(UART_DEBUG == ut) {
 			printf((const char*)str);
 		}
+#else
+		if((UART_DEBUG == ut) || (UART_ESP12 == ut)) {
+			//printf((const char*)str);
+			CDC_Transmit_FS(str, len);
+		}
+#endif
 	}
 
 	return _copyCount;

@@ -177,7 +177,7 @@ int main(void)
 	{
 		current_tick_ = HAL_GetTick();
 
-#if 1
+#if 0
 		HAL_UART_BypassTest();
 		UART_TX_DefaultProc();
 #else

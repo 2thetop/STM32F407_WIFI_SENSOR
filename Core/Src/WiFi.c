@@ -64,8 +64,8 @@ typedef struct AP_LIST_DATA {
 //nst int8_t szNTPServerAddress[] = "1.nl.pool.ntp.org";
 
 // Test Server Address
-const int8_t szTestServerAddress[] = "52.79.53.140";		//eroo@52.79.53.140 / oore!@#$
-const int32_t nTestServerPort = 15151;
+const int8_t szTestServerAddress[] = "192.168.1.10";		//eroo@52.79.53.140 / oore!@#$
+const int32_t nTestServerPort = 7890;
 
 // Device ID
 //const int8_t szDeviceID[] = "a123456789";
