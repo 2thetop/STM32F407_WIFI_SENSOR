@@ -151,12 +151,6 @@ int main(void)
 	SetupBlinkLED(&lbpStatusLED, 1, 1000, 6);
 
 	//////////////////////////////////////////////////////////////////////////////////////
-	// WiFi Module??? 초기??? ???.
-	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
-	//HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
-	//////////////////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////////////////////////
 	// UART ????????? ?????????.
 	HAL_UART_Receive_IT(&huart1, &gUarts[UART_ESP12].rxChar, 1);
 	//HAL_UART_Receive_IT(&huart2, &gUarts[UART_TEMP_HUM].rxChar, 1);
@@ -164,6 +158,14 @@ int main(void)
 	//HAL_UART_Receive_IT(&huart4, &gUarts[UART_UV].rxChar, 1);
 	//HAL_UART_Receive_IT(&huart5, &gUarts[UART_DUST].rxChar, 1);
 	HAL_UART_Receive_IT(&huart6, &gUarts[UART_VIBRATION].rxChar, 1);
+
+	//////////////////////////////////////////////////////////////////////////////////////
+	// WiFi Module??? 초기??? ???.
+	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
+	HAL_Delay(100);
+	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
+	//HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
+	//////////////////////////////////////////////////////////////////////////////////////
 
 #endif
   /* USER CODE END 2 */
