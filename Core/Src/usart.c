@@ -638,7 +638,7 @@ void UART_RX_DefaultProc(void)
 			WiFi_ParsingProc(UART_ESP12, _ch);
 
 			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;       			
-			if (UART_CR == _ch) {
+			if (UART_LF == _ch) {
 				CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
 				pUartQ->bufferIndex = 0;
 			}
@@ -669,7 +669,7 @@ void UART_RX_DefaultProc(void)
 			CQ_PopChar(pRxQ, &_ch);
 			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;       			
 
-			if (0x0A == _ch) {
+			if (UART_LF == _ch) {
 				CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
 				pUartQ->bufferIndex = 0;
 			}
@@ -702,7 +702,7 @@ void UART_RX_DefaultProc(void)
 			CQ_PopChar(pRxQ, &_ch);
 			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;       			
 
-			if (UART_CR == _ch) {
+			if (UART_LF == _ch) {
 				CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
 				pUartQ->bufferIndex = 0;
 			}
@@ -741,7 +741,7 @@ void UART_RX_DefaultProc(void)
 			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;				
 			pUartQ->bufferIndex %= MAX_CQ_BUFFER_COUNT;\
 				
-			if (0x0A == _ch) {
+			if (UART_LF == _ch) {
 				CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
 				pUartQ->bufferIndex = 0;
 			}
