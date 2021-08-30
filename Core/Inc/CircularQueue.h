@@ -1,7 +1,7 @@
 #ifndef __CIRCULAR_QUEUE_H__
 #define __CIRCULAR_QUEUE_H__
 
-#define MAX_CQ_BUFFER_COUNT		512		/// 0x0200
+#define MAX_CQ_BUFFER_COUNT		2048		/// 0x0200
 //volatile uint32_t nHead;
 //volatile uint32_t nTail;
 //volatile uint8_t	aCQBuffer[MAX_CQ_BUFFER_COUNT];
