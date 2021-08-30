@@ -351,18 +351,18 @@ uint8_t USBD_CDC_SOF(struct _USBD_HandleTypeDef *pdev)
 {
 #if 0
 
-  if (rx_full == true)
-  {
-    uint32_t buf_len;
-
-    buf_len = (rx_len - cdcAvailable()) - 1;
-
-    if (buf_len >= USB_FS_MAX_PACKET_SIZE)
+    if (rx_full == true)
     {
-      USBD_CDC_ReceivePacket(pdev);
-      rx_full = false;
+        uint32_t buf_len;
+
+        buf_len = (rx_len - cdcAvailable()) - 1;
+
+        if (buf_len >= USB_FS_MAX_PACKET_SIZE)
+        {
+            USBD_CDC_ReceivePacket(pdev);
+            rx_full = false;
+        }
     }
-  }
 #else
 	uint32_t _receiveCount; 
 	uint8_t _ch;
@@ -372,16 +372,22 @@ uint8_t USBD_CDC_SOF(struct _USBD_HandleTypeDef *pdev)
 		
 	if(0 == CQ_IsEmpty(pRxQ)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
-		for(uint32_t j=0; j<_receiveCount; j++) {
-			CQ_PopChar(pRxQ, &_ch);
-			//UartChar(UART_DEBUG, _ch);
-			//WiFi_ParsingProc(UART_ESP12, _ch);
-			//putchar(_ch);
-		} 
+        if (0 < _receiveCount) {
+            pUartQ->bufferIndex = 0;
+            for(uint32_t j=0; j<_receiveCount; j++) {
+                CQ_PopChar(pRxQ, &_ch);
+                //UartChar(UART_DEBUG, _ch);
+                //WiFi_ParsingProc(UART_ESP12, _ch);
+                //putchar(_ch);
+                pUartQ->buffer[pUartQ->bufferIndex++] = _ch;
+            }
+
+            CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
+        }
 	}
 
 #endif
-  return 0;
+    return 0;
 }
 
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
