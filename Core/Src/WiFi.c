@@ -548,6 +548,8 @@ void SendWiFiCommand(ESTATE _state)
 void ResetESP8266()
 {
 	UartPuts(UART_ESP12, "AT+RST\r\n", 8);
+	//UartPuts(UART_ESP12, "AT+GMR\r\n", 8);
+	//UartPuts(UART_ESP12, "AT\r\n", 4);
 }
 
 void InitESP8266Uart()
@@ -818,6 +820,7 @@ ESTATE parsingResponse(UART_TYPE _uartType, int8_t *line, uint32_t count)
 uint32_t WiFi_ParsingProc(UART_TYPE _uartType, uint8_t ch)
 {
 	switch (ch) {
+#if 0		
 	case UART_CR:
 		CMD_PushChar(_uartType, ch);
 		if (STATE_RECEIVE_MODE_DATA == gvReceiveMode) { 
@@ -827,7 +830,7 @@ uint32_t WiFi_ParsingProc(UART_TYPE _uartType, uint8_t ch)
 			}
 		}
 		break;
-		
+#endif		
 	case UART_LF:
 		if (STATE_RECEIVE_MODE_DATA == gvReceiveMode) { 
 			CMD_PushChar(_uartType, ch);
@@ -1366,9 +1369,8 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 	if(0 ==	IsWaitingForResponse()) {
 		ESTATE _state = GetState();
 		switch(_state) {
-		case STATE_NOT_INIT:
+			case STATE_NOT_INIT:
 			SendWiFiCommand(CMD_RESET);
-			wsd.is_waiting_wifi_response_ = 1;
 			SetWaitingForResponse(_tick, RESET_COMMAND_WAIT_TIMEOUT);
 			break;
 		case STATE_INIT_UART:
@@ -1640,7 +1642,7 @@ uint32_t WiFi_DefaultProc(uint32_t _tick)
 				break;
 #endif
 			default:
-				SendWiFiCommand(CMD_RESET);
+				//SendWiFiCommand(CMD_RESET);
 				break;
 			}
 
