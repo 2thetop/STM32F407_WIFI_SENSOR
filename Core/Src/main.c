@@ -203,7 +203,7 @@ int main(void)
 
 		CheckConnectingServer(current_tick_);	
 
-		//BlinkLED(&lbpPowerLED, current_tick_);
+		BlinkLED(&lbpPowerLED, current_tick_);
 		//BlinkLED(&lbpStatusLED, current_tick_);	
 	}
   /* USER CODE END 3 */
