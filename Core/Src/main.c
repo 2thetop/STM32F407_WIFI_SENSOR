@@ -88,9 +88,9 @@ int main(void)
 	/* USER CODE BEGIN 1 */
 	LBP	lbpPowerLED;
 	LBP	lbpStatusLED;
-	LBP	lbpWiFiLED;
-	LBP	lbpUartLED;
-	LBP	lbpDebugLED;
+	//LBP	lbpWiFiLED;
+	//LBP	lbpUartLED;
+	//LBP	lbpDebugLED;
 	
 	uint32_t current_tick_ = 0;
 	//uint32_t display_time_tick_ = 0;

@@ -8,6 +8,7 @@
 //#include "Light.h"
 
 /* USER CODE BEGIN 0 */
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>	// va_list
 #include <string.h>
@@ -892,9 +893,10 @@ void InitReceiveDataState()
 uint8_t CheckReceiveData(UART_TYPE _uartType, uint8_t ch)
 {
 	uint8_t bIsReceiveDataDone = 0;
+#if 0	
 	uint8_t bIsFailedReceiveDataMode = 0;
 	int32_t nFailNum = 0;
-#if 0	
+
 	switch (gvReceiveMode) {
 	case STATE_RECEIVE_MODE_PLUS:
 		if ('I' == ch) {

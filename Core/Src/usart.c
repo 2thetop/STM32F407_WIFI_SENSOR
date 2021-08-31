@@ -24,9 +24,9 @@
 #include <stdio.h>
 #include <stdarg.h>	// va_list
 #include <string.h>
-//#include "console.h"
+#include "WiFi.h"
 #include "usb_device.h"
-
+#include "usbd_cdc_if.h"
 
 UART_Q gUarts[MAX_UART_PORT];
 UART_HandleTypeDef *pUartHandleArray[MAX_UART_PORT];
@@ -621,8 +621,8 @@ void UART_RX_DefaultProc(void)
 	PUART_Q pUartQ;
 	uint32_t _receiveCount;
 	uint8_t _ch;
-    uint8_t buffer[100];
-	uint32_t _string_length = 0;
+    //uint8_t buffer[100];
+	//uint32_t _string_length = 0;
     
 	pUartQ = &gUarts[UART_ESP12];
 	PCQ_BUFFER pRxQ = &pUartQ->rxQ;
@@ -841,7 +841,7 @@ uint32_t UartPuts(UART_TYPE ut, const int8_t *str, int32_t len)
 #else
 		if((UART_DEBUG == ut) || (UART_ESP12 == ut)) {
 			//printf((const char*)str);
-			CDC_Transmit_FS(str, len);
+			CDC_Transmit_FS((uint8_t *)str, len);
 		}
 #endif
 	}

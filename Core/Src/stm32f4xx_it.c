@@ -23,6 +23,7 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -322,19 +323,19 @@ void USART6_IRQHandler(void)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if(TIM4 == htim->Instance)
-	{
-	  //HAL_GPIO_TogglePin(LED3_BLUE_GPIO_Port, LED3_BLUE_Pin);
-	  //HAL_GPIO_TogglePin(LED4_YELLOW_GPIO_Port, LED4_YELLOW_Pin);
+    if(TIM4 == htim->Instance)
+    {
+        //HAL_GPIO_TogglePin(LED3_BLUE_GPIO_Port, LED3_BLUE_Pin);
+        //HAL_GPIO_TogglePin(LED4_YELLOW_GPIO_Port, LED4_YELLOW_Pin);
 #if 0
-      HAL_GPIO_TogglePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
-      HAL_GPIO_TogglePin(LED2_RED_GPIO_Port, LED2_RED_Pin);
-      HAL_GPIO_TogglePin(LED3_BLUE_GPIO_Port, LED3_BLUE_Pin);
-      HAL_GPIO_TogglePin(LED4_YELLOW_GPIO_Port, LED4_YELLOW_Pin);
-      HAL_GPIO_TogglePin(LED5_GREEN_GPIO_Port, LED5_GREEN_Pin);
+        HAL_GPIO_TogglePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
+        HAL_GPIO_TogglePin(LED2_RED_GPIO_Port, LED2_RED_Pin);
+        HAL_GPIO_TogglePin(LED3_BLUE_GPIO_Port, LED3_BLUE_Pin);
+        HAL_GPIO_TogglePin(LED4_YELLOW_GPIO_Port, LED4_YELLOW_Pin);
+        HAL_GPIO_TogglePin(LED5_GREEN_GPIO_Port, LED5_GREEN_Pin);
 #endif
 
-		UART_CheckReceiveTimeout();
+        UART_CheckReceiveTimeout();
 	}
 }
 
