@@ -161,8 +161,8 @@ int main(void)
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// WiFi Module??? 초기??? ???.
-	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
-	HAL_Delay(100);
+	//HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
+	//HAL_Delay(100);
 	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
 	//HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -191,7 +191,12 @@ int main(void)
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-
+		if (GPIO_PIN_SET == HAL_GPIO_ReadPin(TACT_SW1_GPIO_Port, TACT_SW1_Pin)) {
+			HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
+		} 
+		else {
+			HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);		
+		}
 		//CheckCDC(current_tick_);
 		//CheckSwitchLED();
 		//BlinkWhiteLED(current_tick_);
