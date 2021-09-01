@@ -66,7 +66,9 @@ typedef struct AP_LIST_DATA {
 
 // Test Server Address
 const int8_t szTestServerAddress[] = "192.168.1.10";		//eroo@52.79.53.140 / oore!@#$
+//const int8_t szTestServerAddress[] = "112.216.109.238"		// irenox server
 const int32_t nTestServerPort = 7890;
+
 
 // Device ID
 //const int8_t szDeviceID[] = "a123456789";
