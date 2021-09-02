@@ -80,7 +80,7 @@ typedef enum {
 	UART_CDC=UART_LAST,
 	UART_ESP12=UART_P1,
 	UART_TEMP_HUM=UART_P2,
-	UART_TENSIOIN=UART_P3,
+	UART_TENSION=UART_P3,
 	UART_UV=UART_P4,
 	UART_DUST=UART_P5,
 	UART_VIBRATION=UART_P6,
@@ -139,6 +139,12 @@ void UartPrintf(UART_TYPE ut, const int8_t *fmt, ...);
 void HAL_UART_LoopbackTest(void);
 void HAL_UART_BypassTest(void);
 void UART_CheckReceiveTimeout(void);
+
+uint32_t ParsingTempHum(const uint8_t *str, uint32_t len);
+uint32_t ParsingTension(const uint8_t *str, uint32_t len);
+uint32_t ParsingUV(const uint8_t *str, uint32_t len);
+uint32_t ParsingDust(const uint8_t *str, uint32_t len);
+uint32_t ParsingVibration(const uint8_t *str, uint32_t len);
 
 /* USER CODE END Prototypes */
 
