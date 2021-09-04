@@ -139,6 +139,7 @@ void UartPrintf(UART_TYPE ut, const int8_t *fmt, ...);
 void HAL_UART_LoopbackTest(void);
 void HAL_UART_BypassTest(void);
 void UART_CheckReceiveTimeout(void);
+uint32_t SendSensorPacketByWiFi(uint8_t *str, uint32_t len);
 
 uint32_t ParsingTempHum(const uint8_t *str, uint32_t len);
 uint32_t ParsingTension(const uint8_t *str, uint32_t len);

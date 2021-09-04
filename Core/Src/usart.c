@@ -636,7 +636,7 @@ void UART_RX_DefaultProc(void)
 		
 		for(uint32_t j=0; j<_receiveCount; j++) {
 			CQ_PopChar(pRxQ, &_ch);
-			WiFi_ParsingProc(UART_ESP12, _ch);
+			//WiFi_ParsingProc(UART_ESP12, _ch);
 
 			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;       			
 			if (UART_LF == _ch) {
@@ -649,8 +649,7 @@ void UART_RX_DefaultProc(void)
 	pUartQ = &gUarts[UART_TEMP_HUM];
 	pRxQ = &pUartQ->rxQ;
 
-	if ((0 == CQ_IsEmpty(pRxQ)) && 
-		(0 != pUartQ->isReceived)) {
+	if (0 == CQ_IsEmpty(pRxQ)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
 		printf("UART_TEMPHUM: _receiveCount=%d", _receiveCount);
 		for(uint32_t j=0; j<_receiveCount; j++) {
@@ -820,6 +819,23 @@ void UART_CheckReceiveTimeout(void)
 			}
 		}
 	}
+}
+
+uint32_t SendSensorPacketByWiFi(uint8_t *str, uint32_t len)
+{
+	PUART_Q pUartQ;
+	
+	pUartQ = &gUarts[UART_ESP12];
+	PCQ_BUFFER pTxQ = &pUartQ->txQ;
+	
+	if(0 == CQ_IsFull(pTxQ)) {
+		CQ_PushString(pTxQ, str, len);
+		*(str) = '\r';
+		*(str+1) = '\n';
+		CDC_Transmit_FS(str, len);
+	}
+
+	return 0;
 }
 
 uint32_t UartPuts(UART_TYPE ut, const int8_t *str, int32_t len)

@@ -2,10 +2,66 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "Sensor.h"
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>	// va_list
 #include <string.h>
+
+
+SDP	sdp;
+
+
+void InitSensor(uint16_t _boardID)
+{
+	sdp.updateFlag = 0;
+	sdp.boardID = _boardID;
+	sdp.sequenceID = 1;
+	sdp.temperature = 0.0f;
+	sdp.humidity = 0.0f;
+	sdp.tension = 0;
+	sdp.UV = 0.0f;
+	sdp.dustPM1_0 = 0;
+	sdp.dustPM2_5 = 0;
+	sdp.dustPM10_0 = 0;
+	sdp.curVibration = 0;
+	sdp.minVibration = 0;
+	sdp.maxVibration = 0;
+}
+
+uint32_t IsUpdatedSensorFlag()
+{
+	return (0 != sdp.updateFlag);
+}
+
+void ClearSensorFlag()
+{
+	sdp.updateFlag = 0;
+}
+
+uint32_t MakeSensorPacket(char *packet, uint32_t size)
+{
+	if ((NULL == packet) || (0 == size)) {
+		return 0;
+	}
+
+	sprintf(packet, "[%03d,%08d,%4.1f,%4.1f,%d,%4.1f,%05d,%05d,%05d,%d,%d,%d]",
+			sdp.boardID,
+			sdp.sequenceID,
+			sdp.temperature,
+			sdp.humidity,
+			sdp.tension,
+			sdp.UV,
+			sdp.dustPM1_0,
+			sdp.dustPM2_5,
+			sdp.dustPM10_0,
+			sdp.curVibration,
+			sdp.minVibration,
+			sdp.maxVibration);
+	
+	sdp.sequenceID++;
+	
+	return 1;
+}
 
 /*
 	DHT22, Connect error, 0.0, 0.0
@@ -25,16 +81,19 @@ uint32_t ParsingTempHum(const uint8_t *str, uint32_t len)
 	p1 = strstr((const char*)str,  "OK, ");
 	if(NULL == p1) return 0;
 
+	p1 += 4;
+
 	p2 = strchr((const char*)(p1+1), ',');
 	if(NULL == p2) return 0;
 	
-	p1 += 4;
 	p2 += 2;
+	
+	//float fHum = atof((const char*)p1);
+	//float fTemp = atof((const char*)p2); 
+	sdp.humidity = atof((const char*)p1);
+	sdp.temperature  = atof((const char*)p2); 
+	sdp.updateFlag |= (UPDATED_TEMPERATURE | UPDATED_HUMIDITY);
 
-	
-	float fHum = atof((const char*)p1);
-	float fTemp = atof((const char*)p2); 
-	
 	return 1;
 }
 
@@ -56,11 +115,13 @@ uint32_t ParsingTempHum(const uint8_t *str, uint32_t len)
 uint32_t ParsingTension(const uint8_t *str, uint32_t len)
 {
 	//uint8_t* p1 = NULL; 
-	uint32_t nValue = 0;
+	//uint32_t nValue = 0;
 
 	if(NULL == str) return 0;
 
-	nValue = atoi((const char*)str);
+	//nValue = atoi((const char*)str);
+	sdp.tension = atoi((const char*)str);
+	sdp.updateFlag |= UPDATED_TENSION;
 	
 	return 1;
 }
@@ -87,7 +148,9 @@ uint32_t ParsingUV(const uint8_t *str, uint32_t len)
 
 	p1 += 11;
 	
-	float fUV = atof((const char*)p1);
+	//float fUV = atof((const char*)p1);
+	sdp.UV = atof((const char*)p1);
+	sdp.updateFlag |= UPDATED_UV;
 	
 	return 1;
 }
@@ -138,7 +201,9 @@ uint32_t ParsingDust(const uint8_t *str, uint32_t len)
 		_checksum += *p1++;
     }
 
-    if(pDsd->checksum != _checksum) {
+    //if(pDsd->checksum != _checksum) {
+    if ((pDsd->hi_checksum != (_checksum >> 8)) &&
+		(pDsd->lo_checksum != (_checksum & 0xFF))) {
 		return 0;
     }
 	
@@ -146,9 +211,13 @@ uint32_t ParsingDust(const uint8_t *str, uint32_t len)
 		return 0;
     }
 
-	uint16_t concPM1_0_amb = pDsd->concPM1_0_amb;
-	uint16_t concPM2_5_amb = pDsd->concPM2_5_amb;
-	uint16_t concPM10_0_amb = pDsd->concPM10_0_amb;	
+	//uint16_t concPM1_0_amb = pDsd->concPM1_0_amb;
+	//uint16_t concPM2_5_amb = pDsd->concPM2_5_amb;
+	//uint16_t concPM10_0_amb = pDsd->concPM10_0_amb;	
+	sdp.dustPM1_0 = pDsd->concPM1_0_amb;
+	sdp.dustPM2_5 = pDsd->concPM2_5_amb;
+	sdp.dustPM10_0 = pDsd->concPM10_0_amb;	
+	sdp.updateFlag |= UPDATED_DUST;
 	
 	return 1;
 }
@@ -168,7 +237,7 @@ uint32_t ParsingVibration(const uint8_t *str, uint32_t len)
 {
 	char* p1 = NULL; 
 	uint32_t _index = 0;
-	uint32_t _min = 0, _current = 0, _max = 0;
+	//uint32_t _min = 0, _current = 0, _max = 0;
 	const char _seperator[] = ",\r\n";
 	
 	if(NULL == str) return 0;
@@ -177,13 +246,19 @@ uint32_t ParsingVibration(const uint8_t *str, uint32_t len)
 
     while (NULL != p1) {
 		if (2 == _index) {
-			_min = atoi((const char*)p1);
+			//_cur = atoi((const char*)p1);
+			sdp.curVibration  = atoi((const char*)p1);
+			sdp.updateFlag |= UPDATED_VIBRATION;
 		}
 		else if (3 == _index) {
-			_current = atoi((const char*)p1);
+			//_min = atoi((const char*)p1);
+			sdp.minVibration  = atoi((const char*)p1);
+			sdp.updateFlag |= UPDATED_VIBRATION;
 		}
 		else if (4 == _index) {
-			_max = atoi((const char*)p1);
+			//_max = atoi((const char*)p1);
+			sdp.maxVibration  = atoi((const char*)p1);
+			sdp.updateFlag |= UPDATED_VIBRATION;
 			break;
 		}
         //printf("%s\n", ptr);          // 자른 문자열 출력

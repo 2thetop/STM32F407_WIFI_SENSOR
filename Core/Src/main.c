@@ -29,6 +29,7 @@
 #include "WiFi.h"
 #include "LedBlink.h"
 #include "usbd_cdc_if.h"
+#include "Sensor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,9 +89,11 @@ int main(void)
 	/* USER CODE BEGIN 1 */
 	LBP	lbpPowerLED;
 	LBP	lbpStatusLED;
-	//LBP	lbpWiFiLED;
-	//LBP	lbpUartLED;
-	//LBP	lbpDebugLED;
+	LBP	lbpWiFiLED;
+	LBP	lbpUartLED;
+	LBP	lbpDebugLED;
+
+	char sensorPacket[100];
 	
 	uint32_t current_tick_ = 0;
 	//uint32_t display_time_tick_ = 0;
@@ -142,6 +145,8 @@ int main(void)
 #if 1
 	board_id_ = GetBoardID();
 
+	InitSensor((uint16_t)board_id_);
+	
     //////////////////////////////////////////////////////////////////////////////////////
 	// 상태 표시를 위한 LED를 Blink 설정을 함.
 	InitBlinkLLED(&lbpPowerLED, LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
@@ -153,10 +158,10 @@ int main(void)
 	//////////////////////////////////////////////////////////////////////////////////////
 	// UART ????????? ?????????.
 	HAL_UART_Receive_IT(&huart1, &gUarts[UART_ESP12].rxChar, 1);
-	//HAL_UART_Receive_IT(&huart2, &gUarts[UART_TEMP_HUM].rxChar, 1);
-	//HAL_UART_Receive_IT(&huart3, &gUarts[UART_TENSIOIN].rxChar, 1);
-	//HAL_UART_Receive_IT(&huart4, &gUarts[UART_UV].rxChar, 1);
-	//HAL_UART_Receive_IT(&huart5, &gUarts[UART_DUST].rxChar, 1);
+	HAL_UART_Receive_IT(&huart2, &gUarts[UART_TEMP_HUM].rxChar, 1);
+	HAL_UART_Receive_IT(&huart3, &gUarts[UART_TENSION].rxChar, 1);
+	HAL_UART_Receive_IT(&huart4, &gUarts[UART_UV].rxChar, 1);
+	HAL_UART_Receive_IT(&huart5, &gUarts[UART_DUST].rxChar, 1);
 	HAL_UART_Receive_IT(&huart6, &gUarts[UART_VIBRATION].rxChar, 1);
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -184,8 +189,18 @@ int main(void)
 		UART_TX_DefaultProc();
 #else
 		UART_RX_DefaultProc();
+
+		if (1 == IsUpdatedSensorFlag()) {
+			MakeSensorPacket(sensorPacket, sizeof(sensorPacket));
+
+			uint32_t _count = strlen(sensorPacket);
+			SendSensorPacketByWiFi((uint8_t*)sensorPacket, _count);
+			
+			ClearSensorFlag();
+		}
+			
 		UART_TX_DefaultProc();
-		WiFi_DefaultProc(current_tick_);
+		//'WiFi_DefaultProc(current_tick_);
 #endif		
 
 		/* USER CODE END WHILE */
@@ -203,7 +218,7 @@ int main(void)
 
 		CheckConnectingServer(current_tick_);	
 
-		BlinkLED(&lbpPowerLED, current_tick_);
+		//BlinkLED(&lbpPowerLED, current_tick_);
 		//BlinkLED(&lbpStatusLED, current_tick_);	
 	}
   /* USER CODE END 3 */

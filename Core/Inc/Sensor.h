@@ -69,15 +69,49 @@ typedef struct _DUST_SENSOR_DATA {
 	uint16_t rawGt10_0um;
 	uint8_t version;
 	uint8_t errorCode;
-	uint16_t checksum;
+	uint8_t hi_checksum;
+	uint8_t lo_checksum;
 } DSD, *PDSD;
 
 
+
+#define UPDATED_TEMPERATURE		0x0001
+#define UPDATED_HUMIDITY		0x0002
+#define UPDATED_TENSION			0x0004
+#define UPDATED_UV				0x0008
+#define UPDATED_DUST			0x0010
+#define UPDATED_VIBRATION		0x0020
+
+typedef struct _SENSOR_DATA_PACKET {
+	uint16_t updateFlag;
+	uint16_t boardID;
+	uint32_t sequenceID;
+	float temperature;
+	float humidity;
+	uint16_t tension;
+	float UV;
+	uint16_t dustPM1_0;
+	uint16_t dustPM2_5;
+	uint16_t dustPM10_0;
+	uint16_t curVibration;
+	uint16_t minVibration;
+	uint16_t maxVibration;
+} SDP, *PSDP;
+
+
+
+void InitSensor(uint16_t _boardID);
+uint32_t IsUpdatedSensorFlag();
+void ClearSensorFlag();
+uint32_t MakeSensorPacket(char *packet, uint32_t size);
 uint32_t ParsingTempHum(const uint8_t *str, uint32_t len);
 uint32_t ParsingTension(const uint8_t *str, uint32_t len);
 uint32_t ParsingUV(const uint8_t *str, uint32_t len);
 uint32_t ParsingDust(const uint8_t *str, uint32_t len);
 uint32_t ParsingVibration(const uint8_t *str, uint32_t len);
+
+
+extern SDP sdp;
 
 /* USER CODE END Prototypes */
 
