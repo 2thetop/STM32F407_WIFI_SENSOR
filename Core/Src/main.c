@@ -42,6 +42,7 @@
 #define WHITE_LED_ON					0
 #define BLINK_WHITE_LED_INTERVAL		500
 
+#define SEND_SENSOR_INTERAVAL			5000
 /* USER CODE END PD */
 
 
@@ -98,6 +99,7 @@ int main(void)
 	uint32_t current_tick_ = 0;
 	//uint32_t display_time_tick_ = 0;
 	//uint32_t check_reservation_tick_ = 0;
+	uint32_t sensor_interval_tick_ = 0;
 
 
 	/* USER CODE END 1 */
@@ -193,8 +195,11 @@ int main(void)
 		if (1 == IsUpdatedSensorFlag()) {
 			MakeSensorPacket(sensorPacket, sizeof(sensorPacket));
 
-			uint32_t _count = strlen(sensorPacket);
-			SendSensorPacketByWiFi((uint8_t*)sensorPacket, _count);
+			if (SEND_SENSOR_INTERAVAL < (current_tick_ - sensor_interval_tick_)) {
+				uint32_t _count = strlen(sensorPacket);
+				SendSensorPacketByWiFi((uint8_t*)sensorPacket, _count);
+				sensor_interval_tick_ = current_tick_;
+			}
 			
 			ClearSensorFlag();
 		}
@@ -218,7 +223,7 @@ int main(void)
 
 		CheckConnectingServer(current_tick_);	
 
-		//BlinkLED(&lbpPowerLED, current_tick_);
+		BlinkLED(&lbpPowerLED, current_tick_);
 		//BlinkLED(&lbpStatusLED, current_tick_);	
 	}
   /* USER CODE END 3 */
