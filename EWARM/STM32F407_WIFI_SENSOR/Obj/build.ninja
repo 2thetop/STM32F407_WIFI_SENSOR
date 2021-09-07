@@ -24,6 +24,7 @@ build CircularQueue.pbi : index CircularQueue.xcl
 build gpio.pbi : index gpio.xcl
 build LedBlink.pbi : index LedBlink.xcl
 build main.pbi : index main.xcl
+build Sensor.pbi : index Sensor.xcl
 build stm32f4xx_hal_msp.pbi : index stm32f4xx_hal_msp.xcl
 build stm32f4xx_it.pbi : index stm32f4xx_it.xcl
 build tim.pbi : index tim.xcl
@@ -57,13 +58,13 @@ build usbd_cdc.pbi : index usbd_cdc.xcl
 build usbd_core.pbi : index usbd_core.xcl
 build usbd_ctlreq.pbi : index usbd_ctlreq.xcl
 build usbd_ioreq.pbi : index usbd_ioreq.xcl
-build STM32F407_WIFI_SENSOR_part0.pbi : link CircularQueue.pbi gpio.pbi LedBlink.pbi main.pbi stm32f4xx_hal_msp.pbi stm32f4xx_it.pbi
-build STM32F407_WIFI_SENSOR_part1.pbi : link tim.pbi usart.pbi WiFi.pbi usb_device.pbi usbd_cdc_if.pbi usbd_desc.pbi
-build STM32F407_WIFI_SENSOR_part2.pbi : link usbd_conf.pbi system_stm32f4xx.pbi stm32f4xx_hal.pbi stm32f4xx_hal_cortex.pbi stm32f4xx_hal_dma.pbi stm32f4xx_hal_dma_ex.pbi
-build STM32F407_WIFI_SENSOR_part3.pbi : link stm32f4xx_hal_exti.pbi stm32f4xx_hal_flash.pbi stm32f4xx_hal_flash_ex.pbi stm32f4xx_hal_flash_ramfunc.pbi stm32f4xx_hal_gpio.pbi stm32f4xx_hal_pcd.pbi
-build STM32F407_WIFI_SENSOR_part4.pbi : link stm32f4xx_hal_pcd_ex.pbi stm32f4xx_hal_pwr.pbi stm32f4xx_hal_pwr_ex.pbi stm32f4xx_hal_rcc.pbi stm32f4xx_hal_rcc_ex.pbi stm32f4xx_hal_tim.pbi
-build STM32F407_WIFI_SENSOR_part5.pbi : link stm32f4xx_hal_tim_ex.pbi stm32f4xx_hal_uart.pbi stm32f4xx_ll_usb.pbi usbd_cdc.pbi usbd_core.pbi usbd_ctlreq.pbi
-build STM32F407_WIFI_SENSOR_part6.pbi : link usbd_ioreq.pbi
+build STM32F407_WIFI_SENSOR_part0.pbi : link CircularQueue.pbi gpio.pbi LedBlink.pbi main.pbi Sensor.pbi stm32f4xx_hal_msp.pbi
+build STM32F407_WIFI_SENSOR_part1.pbi : link stm32f4xx_it.pbi tim.pbi usart.pbi WiFi.pbi usb_device.pbi usbd_cdc_if.pbi
+build STM32F407_WIFI_SENSOR_part2.pbi : link usbd_desc.pbi usbd_conf.pbi system_stm32f4xx.pbi stm32f4xx_hal.pbi stm32f4xx_hal_cortex.pbi stm32f4xx_hal_dma.pbi
+build STM32F407_WIFI_SENSOR_part3.pbi : link stm32f4xx_hal_dma_ex.pbi stm32f4xx_hal_exti.pbi stm32f4xx_hal_flash.pbi stm32f4xx_hal_flash_ex.pbi stm32f4xx_hal_flash_ramfunc.pbi stm32f4xx_hal_gpio.pbi
+build STM32F407_WIFI_SENSOR_part4.pbi : link stm32f4xx_hal_pcd.pbi stm32f4xx_hal_pcd_ex.pbi stm32f4xx_hal_pwr.pbi stm32f4xx_hal_pwr_ex.pbi stm32f4xx_hal_rcc.pbi stm32f4xx_hal_rcc_ex.pbi
+build STM32F407_WIFI_SENSOR_part5.pbi : link stm32f4xx_hal_tim.pbi stm32f4xx_hal_tim_ex.pbi stm32f4xx_hal_uart.pbi stm32f4xx_ll_usb.pbi usbd_cdc.pbi usbd_core.pbi
+build STM32F407_WIFI_SENSOR_part6.pbi : link usbd_ctlreq.pbi usbd_ioreq.pbi
 build STM32F407_WIFI_SENSOR.pbd : link STM32F407_WIFI_SENSOR_part0.pbi STM32F407_WIFI_SENSOR_part1.pbi STM32F407_WIFI_SENSOR_part2.pbi STM32F407_WIFI_SENSOR_part3.pbi STM32F407_WIFI_SENSOR_part4.pbi STM32F407_WIFI_SENSOR_part5.pbi STM32F407_WIFI_SENSOR_part6.pbi
 build STM32F407_WIFI_SENSOR.pbw : browsedata STM32F407_WIFI_SENSOR.pbd
 

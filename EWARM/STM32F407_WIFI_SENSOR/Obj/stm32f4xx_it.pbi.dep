@@ -41,4 +41,7 @@ stm32f4xx_it.pbi: \
   D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_pcd.h \
   D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h \
   D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h \
-  D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Core/Inc\stm32f4xx_it.h
+  D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Core/Inc\stm32f4xx_it.h \
+  D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Core/Inc\usart.h \
+  D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Core/Inc/main.h \
+  D:\Work\MyProject\STM32_Project\STM32F407_WIFI_SENSOR\EWARM/../Core/Inc/CircularQueue.h
