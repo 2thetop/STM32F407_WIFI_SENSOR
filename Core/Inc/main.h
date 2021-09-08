@@ -68,6 +68,8 @@ void Error_Handler(void);
 #define LED4_YELLOW_GPIO_Port GPIOA
 #define ESP_nRESET_Pin GPIO_PIN_4
 #define ESP_nRESET_GPIO_Port GPIOC
+#define ESP_GPIO_0_Pin GPIO_PIN_5
+#define ESP_GPIO_0_GPIO_Port GPIOC
 #define TACT_SW1_Pin GPIO_PIN_10
 #define TACT_SW1_GPIO_Port GPIOD
 #define TACT_SW2_Pin GPIO_PIN_11
