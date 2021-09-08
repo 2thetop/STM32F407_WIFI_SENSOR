@@ -17,8 +17,8 @@
 
 
 #define MAX_LED_BLINK_PERIOD				1000
-#define DEFAULT_ON_DURATION					100
-#define DEFAULT_OFF_DURATION				100
+#define DEFAULT_ON_DURATION					50		//100
+#define DEFAULT_OFF_DURATION				50		//100
 
 
 typedef struct LED_BLINK_PACK {
@@ -47,6 +47,7 @@ typedef struct LED_BLINK_PACK {
 
 void InitBlinkLLED(PLBP pLbp, GPIO_TypeDef* _p_port, uint32_t _gpio_pin);
 void SetupBlinkLED(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count);
+void SetupBlinkLEDDetail(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count, uint32_t _duraion);
 void BlinkLED(PLBP pLbp, uint32_t _tick);
 
 

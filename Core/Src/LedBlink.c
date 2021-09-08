@@ -41,7 +41,7 @@ void SetupBlinkLED(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint3
 	pLbp->start_tick_ = 0;
 	pLbp->is_inverted_ = _is_inverted;
 	pLbp->max_period_ = _max_period;
-	pLbp->max_blink_count_ = _blink_count;
+	pLbp->max_blink_count_ = _blink_count * 2;
 
 	pLbp->currnet_blink_count_ = 0;
 	pLbp->current_led_onoff_ = 0;
@@ -52,13 +52,29 @@ void SetupBlinkLED(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint3
 	pLbp->onoff_start_tick_ = 0;
 }
 
+void SetupBlinkLEDDetail(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count, uint32_t _duraion)
+{
+	pLbp->start_tick_ = 0;
+	pLbp->is_inverted_ = _is_inverted;
+	pLbp->max_period_ = _max_period;
+	pLbp->max_blink_count_ = _blink_count * 2;
+
+	pLbp->currnet_blink_count_ = 0;
+	pLbp->current_led_onoff_ = 0;
+
+	pLbp->on_duration_ = _duraion;
+	pLbp->off_duration_ = _duraion;
+
+	pLbp->onoff_start_tick_ = 0;
+}
+
 void BlinkLED(PLBP pLbp, uint32_t _tick)
 {
 	if(pLbp->max_period_ <= (_tick - pLbp->start_tick_)) {
 		pLbp->start_tick_ = _tick;
 		pLbp->onoff_start_tick_ = _tick;
 		
-		if(1 == pLbp->is_inverted_) {
+		if(0 == pLbp->is_inverted_) {
 			pLbp->current_led_onoff_ = 1;
 			// LED ON
 			HAL_GPIO_WritePin(pLbp->p_gpio_port, pLbp->gpio_pin, GPIO_PIN_SET);

@@ -43,6 +43,11 @@
 #define BLINK_WHITE_LED_INTERVAL		500
 
 #define SEND_SENSOR_INTERAVAL			5000
+
+
+#define MODE_NORMAL					0
+#define MODE_ESP_PASS_THROUGH		1
+
 /* USER CODE END PD */
 
 
@@ -78,6 +83,10 @@ void CheckCDC(uint32_t _current_tick);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint32_t g_mode = 0;
+uint32_t esp_path_through_interval = 5000;
+uint32_t esp_path_through_tick = 0;
+
 
 /* USER CODE END 0 */
 
@@ -100,6 +109,7 @@ int main(void)
 	//uint32_t display_time_tick_ = 0;
 	//uint32_t check_reservation_tick_ = 0;
 	uint32_t sensor_interval_tick_ = 0;
+	uint32_t is_pressed_all_tact_sw = 0;
 
 
 	/* USER CODE END 1 */
@@ -152,10 +162,10 @@ int main(void)
     //////////////////////////////////////////////////////////////////////////////////////
 	// 상태 표시를 위한 LED를 Blink 설정을 함.
 	InitBlinkLLED(&lbpPowerLED, LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
-	SetupBlinkLED(&lbpPowerLED, 1, 1000, 2);
+	SetupBlinkLED(&lbpPowerLED, 0, 1000, 1);
 
 	InitBlinkLLED(&lbpStatusLED, LED3_BLUE_GPIO_Port, LED3_BLUE_Pin);
-	SetupBlinkLED(&lbpStatusLED, 1, 1000, 6);
+	SetupBlinkLED(&lbpStatusLED, 0, 1000, 1);
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// UART ????????? ?????????.
@@ -223,8 +233,81 @@ int main(void)
 
 		CheckConnectingServer(current_tick_);	
 
+		// TODO
+		// 1. 일반 모드에서 TACT1, TACT2을 5초동안 누르면 esp path through 모드로 진입함.
+		// 3. esp path through 모드에서 TACT1을 누르면 ESP nReset이 low가 됨. 떼면 High가 됨.
+		//    TACT2를 누르면 BOOT(GPIO))가 Low가 됨. 떼면 High가 됨.
+		// 4. esp path through 모드에서 CDC의 RX와 TX는 ESP8266 모듈과 연결되어 
+		//
+		//
+		// 2. esp path through 모드에서 TACT1, TACT2을 5초동안 누르면 일반 모드로 진입함.
+		//
+		//
+
+/*
+#define MODE_NORMAL					0
+#define MODE_ESP_PASS_THROUGH		1
+		
+		uint32_t g_mode = 0;
+		uint32_t esp_path_through_interval = 5000;
+		uint32_t esp_path_through_tick = 0;
+		uint32_t is_pressed_all_tact_sw = 0;
+		
+#define ESP_nRESET_Pin GPIO_PIN_4
+#define ESP_nRESET_GPIO_Port GPIOC
+#define ESP_GPIO_0_Pin GPIO_PIN_5
+#define ESP_GPIO_0_GPIO_Port GPIOC
+*/		
+		do {
+			GPIO_PinState tact_sw1_state = HAL_GPIO_ReadPin(TACT_SW1_GPIO_Port, TACT_SW1_Pin);
+			GPIO_PinState tact_sw2_state = HAL_GPIO_ReadPin(TACT_SW2_GPIO_Port, TACT_SW2_Pin);
+			
+			if ((GPIO_PIN_RESET == tact_sw1_state) && (GPIO_PIN_RESET == tact_sw2_state))  {
+				is_pressed_all_tact_sw = 1;
+			}
+			else {
+				is_pressed_all_tact_sw = 0;  
+			}
+
+			if ((1 == is_pressed_all_tact_sw) && (MODE_NORMAL == g_mode)) {
+				if (0 == esp_path_through_interval) {
+					esp_path_through_tick = current_tick_;
+				}
+
+				if (esp_path_through_interval <=  (current_tick_ - esp_path_through_tick)) {
+					g_mode = MODE_ESP_PASS_THROUGH;
+					SetupBlinkLEDDetail(&lbpStatusLED, 1, 2000, 4, 100);
+				}
+			}
+			else if ((1 == is_pressed_all_tact_sw) && (MODE_ESP_PASS_THROUGH == g_mode)) {
+				if (0 == esp_path_through_interval) {
+					esp_path_through_tick = current_tick_;
+				}
+				if (esp_path_through_interval <=  (current_tick_ - esp_path_through_tick)) {
+					g_mode = MODE_NORMAL;
+					SetupBlinkLED(&lbpStatusLED, 0, 1000, 1);
+				}
+			}
+			
+			
+			if (GPIO_PIN_RESET == tact_sw1_state) {
+				HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_RESET);
+			}
+			else {
+				  HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_SET);
+			}
+
+			if (GPIO_PIN_RESET == tact_sw2_state) {
+				HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_RESET);
+			}
+			else {
+				  HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_SET);
+			}
+		}
+		while(0);
+		
 		BlinkLED(&lbpPowerLED, current_tick_);
-		//BlinkLED(&lbpStatusLED, current_tick_);	
+		BlinkLED(&lbpStatusLED, current_tick_);	
 	}
   /* USER CODE END 3 */
 }
