@@ -1,0 +1,10 @@
+diff a/Core/Src/main.c b/Core/Src/main.c	(rejected hunks)
+@@ -146,7 +146,7 @@
+ 	InitSensor((uint16_t)board_id_);
+ 	
+     //////////////////////////////////////////////////////////////////////////////////////
+-	// 상태 표시를 위한 LED를 Blink 설정을 함.
++	// ?��?�� ?��?���? ?��?�� LED�? Blink ?��?��?�� ?��.
+ 	InitBlinkLLED(&lbpPowerLED, LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
+ 	SetupBlinkLED(&lbpPowerLED, 1, 1000, 2);
+ 
