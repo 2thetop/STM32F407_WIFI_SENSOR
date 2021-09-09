@@ -748,6 +748,17 @@ void UART_RX_DefaultProc(void)
 	}
 
 
+	pUartQ = &gUarts[UART_VCP];
+	pRxQ = &pUartQ->rxQ;
+
+	if (0 == CQ_IsFull(pRxQ)) {
+		_receiveCount = CQ_GetDataCount(pRxQ);
+		printf("UART_VCP: _receiveCount=%d", _receiveCount);
+		CQ_PopString(pRxQ, pUartQ->buffer, _receiveCount);
+		//			
+	}
+
+
 #if 0
 	pUartQ = &gUarts[UART_DEBUG];
 	pRxQ = &pUartQ->rxQ;

@@ -291,6 +291,20 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+  uint32_t _freeCount = 0;
+  uint32_t _saveCount = 0;
+  PUART_Q pUartQ = &gUarts[UART_VCP];
+  PCQ_BUFFER pRxQ = &pUartQ->rxQ;
+  
+  if (0 == CQ_IsFull(pRxQ)) {
+	  _freeCount = CQ_GetFreeCount(pRxQ);
+	  _saveCount = MIN(*Len, _freeCount);
+
+	  printf("UART_VCP : _receiveCount=%d, _saveCount=%d", *Len, _saveCount);
+	  
+	  CQ_PushString(pRxQ, (uint8_t *)Buf, _saveCount);
+  }
+  
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);
