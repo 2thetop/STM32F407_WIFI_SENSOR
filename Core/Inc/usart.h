@@ -41,6 +41,9 @@ extern UART_HandleTypeDef huart6;
 /* USER CODE BEGIN Private defines */
 #define UART_RECEIVE_TIMEOUT	300
 
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
 #if 0
 
 typedef enum {

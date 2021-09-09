@@ -628,7 +628,7 @@ void UART_RX_DefaultProc(void)
 	pUartQ = &gUarts[UART_ESP12];
 	PCQ_BUFFER pRxQ = &pUartQ->rxQ;
 
-	if(0 == CQ_IsEmpty(pRxQ)) {
+	if(0 == CQ_IsFull(pRxQ)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
 
 		//sprintf(buffer, "UART_ESP12: _receiveCount=%d", _receiveCount);
@@ -649,7 +649,7 @@ void UART_RX_DefaultProc(void)
 	pUartQ = &gUarts[UART_TEMP_HUM];
 	pRxQ = &pUartQ->rxQ;
 
-	if (0 == CQ_IsEmpty(pRxQ)) {
+	if (0 == CQ_IsFull(pRxQ)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
 		printf("UART_TEMPHUM: _receiveCount=%d", _receiveCount);
 		for(uint32_t j=0; j<_receiveCount; j++) {
@@ -667,7 +667,7 @@ void UART_RX_DefaultProc(void)
 	pUartQ = &gUarts[UART_TENSION];
 	pRxQ = &pUartQ->rxQ;
 
-	if (0 == CQ_IsEmpty(pRxQ)) {
+	if (0 == CQ_IsFull(pRxQ)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
 		printf("UART_TENSION: _receiveCount=%d", _receiveCount);
         for(uint32_t j=0; j<_receiveCount; j++) {
@@ -685,7 +685,7 @@ void UART_RX_DefaultProc(void)
 	pUartQ = &gUarts[UART_UV];
 	pRxQ = &pUartQ->rxQ;
 
-	if (0 == CQ_IsEmpty(pRxQ)) {
+	if (0 == CQ_IsFull(pRxQ)) {
 		//strncpy((char*)buffer, "[UART_UV]:", 10);
 		//CQ_PopString(pRxQ, buffer+10, _receiveCount);
 		//CDC_Transmit_FS(buffer, _receiveCount + 10);
@@ -707,7 +707,7 @@ void UART_RX_DefaultProc(void)
 	pUartQ = &gUarts[UART_DUST];
 	pRxQ = &pUartQ->rxQ;
 
-	if (0 == CQ_IsEmpty(pRxQ)) {
+	if (0 == CQ_IsFull(pRxQ)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
 		printf("UART_DUST: _receiveCount=%d", _receiveCount);
 		for(uint32_t j=0; j<_receiveCount; j++) {
@@ -731,7 +731,7 @@ void UART_RX_DefaultProc(void)
 	pUartQ = &gUarts[UART_VIBRATION];
 	pRxQ = &pUartQ->rxQ;
 
-	if (0 == CQ_IsEmpty(pRxQ)) {
+	if (0 == CQ_IsFull(pRxQ)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
 		printf("UART_VIBRATION: _receiveCount=%d", _receiveCount);
 		for(uint32_t j=0; j<_receiveCount; j++) {
@@ -752,7 +752,7 @@ void UART_RX_DefaultProc(void)
 	pUartQ = &gUarts[UART_DEBUG];
 	pRxQ = &pUartQ->rxQ;
 
-	if(0 == CQ_IsEmpty(pRxQ)) {
+	if(0 == CQ_IsFull(pRxQ)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
 		for(uint32_t j=0; j<_receiveCount; j++) {
 			CQ_PopChar(pRxQ, &_ch);
