@@ -215,7 +215,7 @@ int main(void)
 		}
 			
 		UART_TX_DefaultProc();
-		//'WiFi_DefaultProc(current_tick_);
+		WiFi_DefaultProc(current_tick_);
 #endif		
 
 		/* USER CODE END WHILE */
@@ -289,19 +289,20 @@ int main(void)
 				}
 			}
 			
-			
-			if (GPIO_PIN_RESET == tact_sw1_state) {
-				HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_RESET);
-			}
-			else {
-				  HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_SET);
-			}
+			if (MODE_ESP_PASS_THROUGH == g_mode) {
+				if (GPIO_PIN_RESET == tact_sw1_state) {
+					HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
+				}
+				else {
+					HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
+				}
 
-			if (GPIO_PIN_RESET == tact_sw2_state) {
-				HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_RESET);
-			}
-			else {
-				  HAL_GPIO_WritePin(LED2_RED_GPIO_Port, LED2_RED_Pin, GPIO_PIN_SET);
+				if (GPIO_PIN_RESET == tact_sw2_state) {
+					HAL_GPIO_WritePin(ESP_GPIO_0_GPIO_Port, ESP_GPIO_0_Pin, GPIO_PIN_RESET);
+				}
+				else {
+					HAL_GPIO_WritePin(ESP_GPIO_0_GPIO_Port, ESP_GPIO_0_Pin, GPIO_PIN_SET);
+				}
 			}
 		}
 		while(0);
