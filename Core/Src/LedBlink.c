@@ -18,6 +18,8 @@ void InitBlinkLLED(PLBP pLbp, GPIO_TypeDef* _p_port, uint32_t _gpio_pin)
 {
 	pLbp->is_inverted_ = 0;
 
+	pLbp->blink_type_ = LED_BLINK_PERIODICALLY;
+
 	pLbp->max_period_ = MAX_LED_BLINK_PERIOD;
 
 	pLbp->start_tick_ = 0;
@@ -38,23 +40,13 @@ void InitBlinkLLED(PLBP pLbp, GPIO_TypeDef* _p_port, uint32_t _gpio_pin)
 
 void SetupBlinkLED(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count)
 {
-	pLbp->start_tick_ = 0;
-	pLbp->is_inverted_ = _is_inverted;
-	pLbp->max_period_ = _max_period;
-	pLbp->max_blink_count_ = _blink_count * 2;
-
-	pLbp->currnet_blink_count_ = 0;
-	pLbp->current_led_onoff_ = 0;
-
-	pLbp->on_duration_ = DEFAULT_ON_DURATION;
-	pLbp->off_duration_ = DEFAULT_OFF_DURATION;
-
-	pLbp->onoff_start_tick_ = 0;
+	SetupBlinkLEDDetail(pLbp, LED_BLINK_PERIODICALLY, _is_inverted, _max_period, _blink_count, DEFAULT_ON_DURATION);
 }
 
-void SetupBlinkLEDDetail(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count, uint32_t _duraion)
+void SetupBlinkLEDDetail(PLBP pLbp, uint32_t _blink_type, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count, uint32_t _duraion)
 {
 	pLbp->start_tick_ = 0;
+	pLbp->blink_type_ = _blink_type;	
 	pLbp->is_inverted_ = _is_inverted;
 	pLbp->max_period_ = _max_period;
 	pLbp->max_blink_count_ = _blink_count * 2;
@@ -67,6 +59,12 @@ void SetupBlinkLEDDetail(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period,
 
 	pLbp->onoff_start_tick_ = 0;
 }
+
+void SetupOneShotBlinkLED(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count, uint32_t _duraion)
+{
+	SetupBlinkLEDDetail(pLbp, LED_BLINK_ONESHOT, _is_inverted, _max_period, _blink_count, _duraion);
+}
+
 
 void BlinkLED(PLBP pLbp, uint32_t _tick)
 {

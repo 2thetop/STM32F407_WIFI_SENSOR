@@ -162,10 +162,12 @@ int main(void)
     //////////////////////////////////////////////////////////////////////////////////////
 	// 상태 표시를 위한 LED를 Blink 설정을 함.
 	InitBlinkLLED(&lbpPowerLED, LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
-	SetupBlinkLED(&lbpPowerLED, 0, 1000, 1);
+	//SetupBlinkLED(&lbpPowerLED, 0, 1000, 1);
+	SetupBlinkLEDDetail(&lbpPowerLED, LED_BLINK_PERIODICALLY, 0, 1000, 1, 5);
 
 	InitBlinkLLED(&lbpStatusLED, LED3_BLUE_GPIO_Port, LED3_BLUE_Pin);
-	SetupBlinkLED(&lbpStatusLED, 0, 1000, 1);
+	//SetupBlinkLED(&lbpStatusLED, 0, 1000, 1);
+	SetupBlinkLEDDetail(&lbpStatusLED, LED_BLINK_PERIODICALLY, 0, 1000, 1, 5);
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// UART ????????? ?????????.
@@ -276,7 +278,7 @@ int main(void)
 
 				if (esp_path_through_interval <=  (current_tick_ - esp_path_through_tick)) {
 					g_mode = MODE_ESP_PASS_THROUGH;
-					SetupBlinkLEDDetail(&lbpStatusLED, 1, 2000, 4, 100);
+					SetupBlinkLEDDetail(&lbpStatusLED, LED_BLINK_PERIODICALLY, 1, 2000, 4, 5);
 				}
 			}
 			else if ((1 == is_pressed_all_tact_sw) && (MODE_ESP_PASS_THROUGH == g_mode)) {
@@ -285,7 +287,8 @@ int main(void)
 				}
 				if (esp_path_through_interval <=  (current_tick_ - esp_path_through_tick)) {
 					g_mode = MODE_NORMAL;
-					SetupBlinkLED(&lbpStatusLED, 0, 1000, 1);
+					//SetupBlinkLED(&lbpStatusLED, 0, 1000, 1);
+					SetupBlinkLEDDetail(&lbpStatusLED, LED_BLINK_PERIODICALLY, 0, 1000, 1, 5);
 				}
 			}
 			

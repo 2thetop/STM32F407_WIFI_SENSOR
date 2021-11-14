@@ -20,10 +20,16 @@
 #define DEFAULT_ON_DURATION					50		//100
 #define DEFAULT_OFF_DURATION				50		//100
 
+#define LED_BLINK_PERIODICALLY				0
+#define LED_BLINK_ONESHOT					1
+
+
 
 typedef struct LED_BLINK_PACK {
 	uint32_t is_inverted_;
 
+	uint32_t blink_type_;
+	
 	uint32_t max_period_;
 	uint32_t start_tick_;
 
@@ -46,8 +52,9 @@ typedef struct LED_BLINK_PACK {
 /* USER CODE BEGIN Prototypes */
 
 void InitBlinkLLED(PLBP pLbp, GPIO_TypeDef* _p_port, uint32_t _gpio_pin);
+void SetupBlinkLEDDetail(PLBP pLbp, uint32_t _blink_type, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count, uint32_t _duraion);
 void SetupBlinkLED(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count);
-void SetupBlinkLEDDetail(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count, uint32_t _duraion);
+void SetupOneShotBlinkLED(PLBP pLbp, uint32_t _is_inverted, uint32_t _max_period, uint32_t _blink_count, uint32_t _duraion);
 void BlinkLED(PLBP pLbp, uint32_t _tick);
 
 
