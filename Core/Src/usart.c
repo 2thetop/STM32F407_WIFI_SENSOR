@@ -636,7 +636,7 @@ void UART_RX_DefaultProc(void)
 		
 		for(uint32_t j=0; j<_receiveCount; j++) {
 			CQ_PopChar(pRxQ, &_ch);
-			//WiFi_ParsingProc(UART_ESP12, _ch);
+			WiFi_ParsingProc(UART_ESP12, _ch);
 
 			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;       			
 			if (UART_LF == _ch) {
