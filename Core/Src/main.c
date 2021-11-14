@@ -19,6 +19,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "string.h"    
+#include "dma.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
@@ -30,6 +33,8 @@
 #include "LedBlink.h"
 #include "usbd_cdc_if.h"
 #include "Sensor.h"
+#include "spinor.h"
+    
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +55,6 @@
 
 /* USER CODE END PD */
 
-
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
@@ -70,7 +74,6 @@ uint32_t blink_white_led_tick_ = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-
 /* USER CODE BEGIN PFP */
 uint32_t GetBoardID();
 
@@ -96,7 +99,7 @@ uint32_t esp_path_through_tick = 0;
   */
 int main(void)
 {
-	/* USER CODE BEGIN 1 */
+  /* USER CODE BEGIN 1 */
 	LBP	lbpPowerLED;
 	LBP	lbpStatusLED;
 	LBP	lbpWiFiLED;
@@ -112,38 +115,37 @@ int main(void)
 	uint32_t is_pressed_all_tact_sw = 0;
 
 
-	/* USER CODE END 1 */
+  /* USER CODE END 1 */
 
-	/* MCU Configuration--------------------------------------------------------*/
+  /* MCU Configuration--------------------------------------------------------*/
 
-	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-	HAL_Init();
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
 
-	/* USER CODE BEGIN Init */
+  /* USER CODE BEGIN Init */
 
-	/* USER CODE END Init */
+  /* USER CODE END Init */
 
-	/* Configure the system clock */
-	SystemClock_Config();
+  /* Configure the system clock */
+  SystemClock_Config();
 
-	/* USER CODE BEGIN SysInit */
+  /* USER CODE BEGIN SysInit */
 
-	/* USER CODE END SysInit */
+  /* USER CODE END SysInit */
 
-	/* Initialize all configured peripherals */
-	MX_GPIO_Init();
-	MX_TIM4_Init();
-
-	MX_UART4_Init();
-	MX_UART5_Init();
-	MX_USART1_UART_Init();
-	MX_USART2_UART_Init();
-	MX_USART3_UART_Init();
-	MX_USART6_UART_Init();
-
-	MX_USB_DEVICE_Init();
-
-	/* USER CODE BEGIN 2 */
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_TIM4_Init();
+  MX_UART4_Init();
+  MX_UART5_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
+  MX_USART6_UART_Init();
+  MX_DMA_Init();
+  MX_SPI1_Init();
+  MX_USB_DEVICE_Init();
+  /* USER CODE BEGIN 2 */
 	UART_Init();
 
 	HAL_GPIO_WritePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin, GPIO_PIN_SET);
@@ -153,6 +155,9 @@ int main(void)
 	HAL_GPIO_WritePin(LED5_GREEN_GPIO_Port, LED5_GREEN_Pin, GPIO_PIN_SET);
 
 	HAL_TIM_Base_Start_IT(&htim4);
+    
+    //HAL_SPI_Start_IT(&hspi1);
+    
 
 #if 1
 	board_id_ = GetBoardID();
@@ -160,7 +165,7 @@ int main(void)
 	InitSensor((uint16_t)board_id_);
 	
     //////////////////////////////////////////////////////////////////////////////////////
-	// ÏÉÅÌÉú ÌëúÏãúÎ•º ÏúÑÌïú LEDÎ•º Blink ÏÑ§Ï†ïÏùÑ Ìï®.
+	// ?ÉÅ?Éú ?ëú?ãúÎ•? ?úÑ?ïú LEDÎ•? Blink ?Ñ§?†ï?ùÑ ?ï®.
 	InitBlinkLLED(&lbpPowerLED, LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
 	//SetupBlinkLED(&lbpPowerLED, 0, 1000, 1);
 	SetupBlinkLEDDetail(&lbpPowerLED, LED_BLINK_PERIODICALLY, 0, 1000, 1, 5);
@@ -187,6 +192,28 @@ int main(void)
 	//////////////////////////////////////////////////////////////////////////////////////
 
 #endif
+    
+    uint8_t gbuffer[1024];
+    memset(gbuffer, 0x00, sizeof(gbuffer));
+    gbuffer[0] = 0x30;
+    gbuffer[1] = 0x31;
+    gbuffer[2] = 0x32;
+    gbuffer[3] = 0x33;
+    gbuffer[4] = 0x34;
+    gbuffer[5] = 0x35;
+    gbuffer[6] = 0x36;
+    gbuffer[7] = 0x37;
+        
+    spinor_init();
+    
+    spinor_write_block(0x1000, gbuffer, sizeof(gbuffer));
+    
+    memset(gbuffer, 0x00, sizeof(gbuffer));
+    
+    HAL_Delay(1000);
+    
+    spinor_read_block(0x1000, gbuffer, sizeof(gbuffer));
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -220,9 +247,9 @@ int main(void)
 		WiFi_DefaultProc(current_tick_);
 #endif		
 
-		/* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-		/* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
 		if (GPIO_PIN_SET == HAL_GPIO_ReadPin(TACT_SW1_GPIO_Port, TACT_SW1_Pin)) {
 			HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
 		} 
@@ -236,13 +263,13 @@ int main(void)
 		CheckConnectingServer(current_tick_);	
 
 		// TODO
-		// 1. ÏùºÎ∞ò Î™®ÎìúÏóêÏÑú TACT1, TACT2ÏùÑ 5Ï¥àÎèôÏïà ÎàÑÎ•¥Î©¥ esp path through Î™®ÎìúÎ°ú ÏßÑÏûÖÌï®.
-		// 3. esp path through Î™®ÎìúÏóêÏÑú TACT1ÏùÑ ÎàÑÎ•¥Î©¥ ESP nResetÏù¥ lowÍ∞Ä Îê®. ÎñºÎ©¥ HighÍ∞Ä Îê®.
-		//    TACT2Î•º ÎàÑÎ•¥Î©¥ BOOT(GPIO))Í∞Ä LowÍ∞Ä Îê®. ÎñºÎ©¥ HighÍ∞Ä Îê®.
-		// 4. esp path through Î™®ÎìúÏóêÏÑú CDCÏùò RXÏôÄ TXÎäî ESP8266 Î™®ÎìàÍ≥º Ïó∞Í≤∞ÎêòÏñ¥ 
+		// 1. ?ùºÎ∞? Î™®Îìú?óê?Ñú TACT1, TACT2?ùÑ 5Ï¥àÎèô?ïà ?àÑÎ•¥Î©¥ esp path through Î™®ÎìúÎ°? ÏßÑÏûÖ?ï®.
+		// 3. esp path through Î™®Îìú?óê?Ñú TACT1?ùÑ ?àÑÎ•¥Î©¥ ESP nReset?ù¥ lowÍ∞? ?ê®. ?ñºÎ©? HighÍ∞? ?ê®.
+		//    TACT2Î•? ?àÑÎ•¥Î©¥ BOOT(GPIO))Í∞? LowÍ∞? ?ê®. ?ñºÎ©? HighÍ∞? ?ê®.
+		// 4. esp path through Î™®Îìú?óê?Ñú CDC?ùò RX?? TX?äî ESP8266 Î™®ÎìàÍ≥? ?ó∞Í≤∞Îêò?ñ¥ 
 		//
 		//
-		// 2. esp path through Î™®ÎìúÏóêÏÑú TACT1, TACT2ÏùÑ 5Ï¥àÎèôÏïà ÎàÑÎ•¥Î©¥ ÏùºÎ∞ò Î™®ÎìúÎ°ú ÏßÑÏûÖÌï®.
+		// 2. esp path through Î™®Îìú?óê?Ñú TACT1, TACT2?ùÑ 5Ï¥àÎèô?ïà ?àÑÎ•¥Î©¥ ?ùºÎ∞? Î™®ÎìúÎ°? ÏßÑÏûÖ?ï®.
 		//
 		//
 
@@ -322,41 +349,41 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-	/** Configure the main internal regulator output voltage
-	*/
-	__HAL_RCC_PWR_CLK_ENABLE();
-	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-	/** Initializes the RCC Oscillators according to the specified parameters
-	* in the RCC_OscInitTypeDef structure.
-	*/
-	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-	RCC_OscInitStruct.PLL.PLLM = 4;
-	RCC_OscInitStruct.PLL.PLLN = 168;
-	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-	RCC_OscInitStruct.PLL.PLLQ = 7;
-	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/** Initializes the CPU, AHB and APB buses clocks
-	*/
-	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-	                          |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-	{
-		Error_Handler();
-	}
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */

@@ -70,6 +70,8 @@ void Error_Handler(void);
 #define ESP_nRESET_GPIO_Port GPIOC
 #define ESP_GPIO_0_Pin GPIO_PIN_5
 #define ESP_GPIO_0_GPIO_Port GPIOC
+#define FLASH_CS_Pin GPIO_PIN_0
+#define FLASH_CS_GPIO_Port GPIOB
 #define TACT_SW1_Pin GPIO_PIN_10
 #define TACT_SW1_GPIO_Port GPIOD
 #define TACT_SW2_Pin GPIO_PIN_11
