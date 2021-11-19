@@ -21,6 +21,7 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+#include "global_define.h"
 #include <stdio.h>
 #include <stdarg.h>	// va_list
 #include <string.h>
@@ -740,8 +741,12 @@ void UART_RX_DefaultProc(void)
 			pUartQ->bufferIndex %= MAX_CQ_BUFFER_COUNT;\
 				
 			if (UART_LF == _ch) {
+#ifdef  __USE_UART6_FOR_DEBUG__
+        ;
+#else
 				//CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
 				ParsingVibration(pUartQ->buffer, pUartQ->bufferIndex);
+#endif        
 				pUartQ->bufferIndex = 0;
 			}
 		}
@@ -861,6 +866,12 @@ uint32_t UartPuts(UART_TYPE ut, const int8_t *str, int32_t len)
 		_copyCount = (len < _freeCount) ? len:_freeCount;
 
 		CQ_PushString(pQ,(uint8_t*)str,_copyCount);
+		
+#ifdef  __USE_UART6_FOR_DEBUG__
+		pQ = &gUarts[UART_VIBRATION].txQ;
+		CQ_PushString(pQ,(uint8_t*)str,_copyCount);
+#endif		
+
 #if 0
 		if(UART_DEBUG == ut) {
 			printf((const char*)str);
@@ -947,9 +958,16 @@ extern "C" int _write(int32_t file, uint8_t *ptr, int32_t len) {
 #else
 int _write(int32_t file, uint8_t *ptr, int32_t len) {
 #endif
+#ifdef  __USE_UART6_FOR_DEBUG__
+	PUART_Q pUartQ = &gUarts[UART_VIBRATION];
+	PCQ_BUFFER pTxQ = &pUartQ->txQ;
+
+	CQ_PushString(pTxQ, ptr, len);
+#else
     for(int32_t i = 0; i < len; ++i) { 
 		ITM_SendChar(*ptr++); 
 	}
+#endif	
     return len;
 }
 

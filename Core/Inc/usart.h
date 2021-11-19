@@ -87,7 +87,11 @@ typedef enum {
 	UART_UV=UART_P4,
 	UART_DUST=UART_P5,
 	UART_VIBRATION=UART_P6,
+//#ifdef  __USE_UART6_FOR_DEBUG__
+//	UART_DEBUG=UART_VIBRATION,
+//#else
 	UART_DEBUG=UART_VCP,
+//#endif	
 } UART_TYPE;
 
 #endif

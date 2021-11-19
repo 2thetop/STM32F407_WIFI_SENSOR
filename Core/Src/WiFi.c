@@ -8,6 +8,7 @@
 //#include "Light.h"
 
 /* USER CODE BEGIN 0 */
+#include "global_define.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>	// va_list

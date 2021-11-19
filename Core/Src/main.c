@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
@@ -30,6 +31,8 @@
 #include "LedBlink.h"
 #include "usbd_cdc_if.h"
 #include "Sensor.h"
+#include "w25q16.h"
+    
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +53,6 @@
 
 /* USER CODE END PD */
 
-
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
@@ -70,7 +72,6 @@ uint32_t blink_white_led_tick_ = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-
 /* USER CODE BEGIN PFP */
 uint32_t GetBoardID();
 
@@ -96,7 +97,7 @@ uint32_t esp_path_through_tick = 0;
   */
 int main(void)
 {
-	/* USER CODE BEGIN 1 */
+  /* USER CODE BEGIN 1 */
 	LBP	lbpPowerLED;
 	LBP	lbpStatusLED;
 	LBP	lbpWiFiLED;
@@ -112,38 +113,36 @@ int main(void)
 	uint32_t is_pressed_all_tact_sw = 0;
 
 
-	/* USER CODE END 1 */
+  /* USER CODE END 1 */
 
-	/* MCU Configuration--------------------------------------------------------*/
+  /* MCU Configuration--------------------------------------------------------*/
 
-	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-	HAL_Init();
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
 
-	/* USER CODE BEGIN Init */
+  /* USER CODE BEGIN Init */
 
-	/* USER CODE END Init */
+  /* USER CODE END Init */
 
-	/* Configure the system clock */
-	SystemClock_Config();
+  /* Configure the system clock */
+  SystemClock_Config();
 
-	/* USER CODE BEGIN SysInit */
+  /* USER CODE BEGIN SysInit */
 
-	/* USER CODE END SysInit */
+  /* USER CODE END SysInit */
 
-	/* Initialize all configured peripherals */
-	MX_GPIO_Init();
-	MX_TIM4_Init();
-
-	MX_UART4_Init();
-	MX_UART5_Init();
-	MX_USART1_UART_Init();
-	MX_USART2_UART_Init();
-	MX_USART3_UART_Init();
-	MX_USART6_UART_Init();
-
-	MX_USB_DEVICE_Init();
-
-	/* USER CODE BEGIN 2 */
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_TIM4_Init();
+  MX_UART4_Init();
+  MX_UART5_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
+  MX_USART6_UART_Init();
+  MX_SPI1_Init();
+  MX_USB_DEVICE_Init();
+  /* USER CODE BEGIN 2 */
 	UART_Init();
 
 	HAL_GPIO_WritePin(LED1_WHITE_GPIO_Port, LED1_WHITE_Pin, GPIO_PIN_SET);
@@ -160,7 +159,7 @@ int main(void)
 	InitSensor((uint16_t)board_id_);
 	
     //////////////////////////////////////////////////////////////////////////////////////
-	// 상태 표시를 위한 LED를 Blink 설정을 함.
+	// ?????? ???????? ?????? LED?? Blink ????????? ???.
 	InitBlinkLLED(&lbpPowerLED, LED1_WHITE_GPIO_Port, LED1_WHITE_Pin);
 	//SetupBlinkLED(&lbpPowerLED, 0, 1000, 1);
 	SetupBlinkLEDDetail(&lbpPowerLED, LED_BLINK_PERIODICALLY, 0, 1000, 1, 5);
@@ -180,13 +179,41 @@ int main(void)
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// WiFi Module??? 초기??? ???.
-	//HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
-	//HAL_Delay(100);
+	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
+	HAL_Delay(2000);
 	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
 	//HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
 	//////////////////////////////////////////////////////////////////////////////////////
 
 #endif
+    
+#if 1
+    
+  //HAL_SPI_MspInit(&hspi1);
+  //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+
+    //for (int j = 0; j < 5; j++) {
+        uint8_t cnt = 10;
+        uint32_t sector_num = 5;
+        flash_erase_sector(sector_num);
+        //HAL_Delay(100);
+
+        //flash_read_sector(buffer2, sector_num, 0, 128);
+        //HAL_Delay(100);
+
+        for(uint8_t i=0; i<128; i++) {
+            buffer1[i] = 20 + cnt++;
+        }
+
+        flash_write_sector(buffer1, sector_num, 0, 128);
+        //HAL_Delay(100);
+        
+        flash_read_sector(buffer2, sector_num, 0, 128);
+        flash_read_sector(buffer2, sector_num, 0, 128);
+        //HAL_Delay(100);
+    //}
+#endif
+    
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -220,9 +247,9 @@ int main(void)
 		WiFi_DefaultProc(current_tick_);
 #endif		
 
-		/* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-		/* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
 		if (GPIO_PIN_SET == HAL_GPIO_ReadPin(TACT_SW1_GPIO_Port, TACT_SW1_Pin)) {
 			HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
 		} 
@@ -236,13 +263,13 @@ int main(void)
 		CheckConnectingServer(current_tick_);	
 
 		// TODO
-		// 1. 일반 모드에서 TACT1, TACT2을 5초동안 누르면 esp path through 모드로 진입함.
-		// 3. esp path through 모드에서 TACT1을 누르면 ESP nReset이 low가 됨. 떼면 High가 됨.
-		//    TACT2를 누르면 BOOT(GPIO))가 Low가 됨. 떼면 High가 됨.
-		// 4. esp path through 모드에서 CDC의 RX와 TX는 ESP8266 모듈과 연결되어 
+		// 1. ????? 모드?????? TACT1, TACT2??? 5초동??? ???르면 esp path through 모드?? 진입???.
+		// 3. esp path through 모드?????? TACT1??? ???르면 ESP nReset??? low?? ???. ????? High?? ???.
+		//    TACT2?? ???르면 BOOT(GPIO))?? Low?? ???. ????? High?? ???.
+		// 4. esp path through 모드?????? CDC??? RX?? TX??? ESP8266 모듈?? ???결되??? 
 		//
 		//
-		// 2. esp path through 모드에서 TACT1, TACT2을 5초동안 누르면 일반 모드로 진입함.
+		// 2. esp path through 모드?????? TACT1, TACT2??? 5초동??? ???르면 ????? 모드?? 진입???.
 		//
 		//
 
@@ -322,41 +349,41 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-	/** Configure the main internal regulator output voltage
-	*/
-	__HAL_RCC_PWR_CLK_ENABLE();
-	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-	/** Initializes the RCC Oscillators according to the specified parameters
-	* in the RCC_OscInitTypeDef structure.
-	*/
-	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-	RCC_OscInitStruct.PLL.PLLM = 4;
-	RCC_OscInitStruct.PLL.PLLN = 168;
-	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-	RCC_OscInitStruct.PLL.PLLQ = 7;
-	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/** Initializes the CPU, AHB and APB buses clocks
-	*/
-	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-	                          |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-	{
-		Error_Handler();
-	}
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */
