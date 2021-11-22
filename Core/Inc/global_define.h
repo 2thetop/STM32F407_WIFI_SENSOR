@@ -13,7 +13,7 @@ extern "C" {
 
 /* USER CODE BEGIN Private defines */
 
-#define __USE_UART6_FOR_DEBUG__
+//#define __USE_UART6_FOR_DEBUG__
 
 
 

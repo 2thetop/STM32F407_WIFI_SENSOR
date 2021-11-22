@@ -231,7 +231,8 @@ int main(void)
 #else
 		UART_RX_DefaultProc();
 
-		if (1 == IsUpdatedSensorFlag()) {
+		if ((0 != IsConnectedArduinoServer()) && (1 == IsUpdatedSensorFlag())) {
+		//if (1 == IsUpdatedSensorFlag()) {
 			MakeSensorPacket(sensorPacket, sizeof(sensorPacket));
 
 			if (SEND_SENSOR_INTERAVAL < (current_tick_ - sensor_interval_tick_)) {
@@ -244,7 +245,7 @@ int main(void)
 		}
 			
 		UART_TX_DefaultProc();
-		WiFi_DefaultProc(current_tick_);
+		//WiFi_DefaultProc(current_tick_);
 #endif		
 
     /* USER CODE END WHILE */

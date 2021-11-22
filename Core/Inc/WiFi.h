@@ -236,6 +236,14 @@ typedef enum {
 
 
 
+typedef enum {
+	STATE_NO_WIFI = 0,
+	STATE_WIAT_CONFIG_DATA,
+	STATE_CONNECTED_AP,
+	STATE_CONNECTED_SERVER,
+} ESTATE_ARDUINO;
+
+
 #define MAX_ARGS_COUNT		72
 
 typedef struct {
@@ -333,12 +341,16 @@ typedef struct st_AP_INFO {
 
 
 uint32_t WiFi_ParsingProc(UART_TYPE _uartType, uint8_t ch);
+uint32_t Arduino_ParsingProc(UART_TYPE _uartType, uint8_t ch);
 void InitReceiveDataState();
 uint8_t CheckReceiveData(UART_TYPE _uartType, uint8_t ch);
 void DumpCmdPack(UART_TYPE _uartType, int8_t *line, uint32_t count);
 void ParseReceiveData(UART_TYPE _uartType, uint8_t ch);
 
 uint32_t WiFi_DefaultProc(uint32_t _tick);
+
+uint32_t Arduino_ParsingProc(UART_TYPE _uartType, uint8_t ch);
+uint8_t IsConnectedArduinoServer();
 
 
 void InitWiFi();

@@ -637,9 +637,11 @@ void UART_RX_DefaultProc(void)
 		
 		for(uint32_t j=0; j<_receiveCount; j++) {
 			CQ_PopChar(pRxQ, &_ch);
-			WiFi_ParsingProc(UART_ESP12, _ch);
-
+			//WiFi_ParsingProc(UART_ESP12, _ch);
 			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;       			
+
+			Arduino_ParsingProc(UART_ESP12, _ch);
+
 			if (UART_LF == _ch) {
 				CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
 				pUartQ->bufferIndex = 0;
@@ -758,9 +760,20 @@ void UART_RX_DefaultProc(void)
 
 	if (0 == CQ_IsFull(pRxQ)) {
 		_receiveCount = CQ_GetDataCount(pRxQ);
-		printf("UART_VCP: _receiveCount=%d", _receiveCount);
-		CQ_PopString(pRxQ, pUartQ->buffer, _receiveCount);
+		//printf("UART_VCP: _receiveCount=%d", _receiveCount);
+		//CQ_PopString(pRxQ, pUartQ->buffer, _receiveCount);
 		//			
+		for(uint32_t j=0; j<_receiveCount; j++) {
+			CQ_PopChar(pRxQ, &_ch);
+			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;       			
+
+			ProcCommand(UART_ESP12, _ch);
+
+			if (UART_LF == _ch) {
+				CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
+				pUartQ->bufferIndex = 0;
+			}
+		}
 	}
 
 
@@ -952,6 +965,49 @@ void HAL_UART_BypassTest(void)
 		}
 	}
 }
+
+void ProcCommand(UART_ESP12, _ch)
+{
+		PUART_Q pUartQ = &gUarts[UART_ESP12];
+
+		switch (ch) {
+		case UART_LF:
+			CMD_PushChar(_uartType, ch);
+			CMD_PushChar(_uartType, 0);
+					
+			if (0 == strncmp("ssid:", (char const*)pUartQ->buffer, 5)) {
+				;
+			}
+			else if (0 == strncmp("password:", (char const*)pUartQ->buffer, 9)) {
+				;
+				//UartPuts(UART_ESP12, "ssid:WIFI_AX,password:@i1topassi1top,host:192.168.1.10,port:7890,id:6", 69);
+				//UartPuts(UART_ESP12, "ssid:ir-SCADA,password:ir123456,host:192.168.0.30,port:7890,id:4", 64);
+			}
+			else if (0 == strncmp("host:", (char const*)pUartQ->buffer, 5)) {
+				;
+			}
+			else if (0 == strncmp("port:", (char const*)pUartQ->buffer, 5)) {
+				;
+			}
+			else if (0 == strncmp("help", (char const*)pUartQ->buffer, 4)) {
+				;
+			}
+			else if (0 == strncmp("update", (char const*)pUartQ->buffer, 6) {
+				;
+			}
+			
+			CMD_InitBuffer(_uartType);
+			break;
+			
+		default:
+			CMD_PushChar(_uartType, ch);
+			break;
+		}
+	
+		return CMD_GetBufferIndex(_uartType);
+
+}
+
 
 #ifdef __cplusplus
 extern "C" int _write(int32_t file, uint8_t *ptr, int32_t len) {

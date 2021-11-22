@@ -122,6 +122,43 @@ const WIFI_COMM_ITEM rspTable[MAX_RESPONSE_TABLE_COUNT] = {
 	{ CMD_RESET, RSP_CLOSED, "CLOSED\r\n", 8 },
 };	
 
+/*
+#define MAX_ARDUINO_RESPONSE_TABLE_COUNT 		23
+	
+const WIFI_COMM_ITEM rspArduinoTable[MAX_ARDUINO_RESPONSE_TABLE_COUNT] = {
+	{ CMD_COMMON, RSP_OK, "OK\r\n", 4 },
+	{ CMD_COMMON, RSP_CONNECT_OK, "CONNECT\r\n", 9 },
+	{ CMD_COMMON, RSP_ALREADY_CONNECT, "ALREADEY CONNECTED\r\n", 20 },
+	{ CMD_COMMON, RSP_SEND_OK, "SEND OK\r\n", 9 },
+	{ CMD_COMMON, RSP_CLOSED_SERVER, "0,CLOSED\r\n", 10},
+//	{ CMD_COMMON, RSP_CLOSED_NTP_SERVER, "2,CLOSED\r\n", 10},
+	{ CMD_COMMON, RSP_INVALID_LINK,	"link is not valid\r\n", 19},
+
+	{ CMD_COMMON, RSP_AP_FOUND_OK, "+CWLAP:", 7 },
+
+	{ CMD_SET_MODE, RSP_SET_MODE_OK, "OK\r\n", 4 },
+	{ CMD_ENABLE_MULTICONNECT, RSP_MULTICONNECT_OK, "OK\r\n", 4 },
+	{ CMD_SETUP_SERVER, RSP_SERVER_OK, "OK\r\n", 4 },
+	{ CMD_CONNECT_AP, RSP_GOT_IP, "WIFI GOT IP\r\n",  13},
+//	{ CMD_CONNECT_SERVER, RSP_CONNECT_OK, "CONNECT\r\n", 9 },
+	{ CMD_REQUEST_SEND_DATA, RSP_READY_TO_SEND, "OK\r\n", 4 },
+	{ CMD_RESET, RSP_RESET_OK, "ready\r\n", 7 },
+	{ CMD_RESET, RSP_GOT_IP, "WIFI GOT IP\r\n", 13 },
+	{ CMD_RESET, RSP_CLOSED, "CLOSED\r\n", 8 },
+};	
+
+"Starting WiFi..... "
+"Waiting for new SSID & password within 5 seconds....."
+"Connecting to "
+"Wait for connecting WiFi AP... "
+"WiFi AP is connected"
+
+"Fail to connect to server"
+"Close server connection"
+
+"Succeed to connect to server"
+"WiFi AP is disconnected..."
+*/
 
 //extern  time_t	timeRTC;
 
@@ -146,6 +183,8 @@ static int nReceiveChannel = 0;
 static uint8_t aReceiveDataCount[3] = { 0 };
 
 //static TCPD	gTCPD;
+
+static ESTATE_ARDUINO state_arduino_ = STATE_NO_WIFI;
 
 
 WSD	wsd;
@@ -882,6 +921,79 @@ uint32_t WiFi_ParsingProc(UART_TYPE _uartType, uint8_t ch)
 	return CMD_GetBufferIndex(_uartType);
 }
 
+
+uint32_t Arduino_ParsingProc(UART_TYPE _uartType, uint8_t ch)
+{
+	PUART_Q pUartQ = &gUarts[UART_ESP12];
+	//PCQ_BUFFER pRxQ = &pUartQ->rxQ;
+	//pUartQ->buffer
+/*
+	"Starting WiFi..... " --> NO_WIFI
+	"Waiting for new SSID & password within 5 seconds....." --> CONFIG
+	"Connecting to "
+	"Wait for connecting WiFi AP... " --> CONNECTING_AP
+	"WiFi AP is connected" --> CONNECTED_AP
+	
+	"Fail to connect to server" 
+	"Close server connection"
+	
+	"Succeed to connect to server" --> CONNECTED_SERVER
+	"WiFi AP is disconnected..."  
+*/
+	switch (ch) {
+	case UART_LF:
+		CMD_PushChar(_uartType, ch);
+		CMD_PushChar(_uartType, 0);
+
+		//ParseReceiveData(_uartType, ch);
+				
+		if (0 == strncmp("Starting WiFi..... ", (char const*)pUartQ->buffer, 19)) {
+			state_arduino_ = STATE_NO_WIFI;
+		}
+		else if (0 == strncmp("Waiting for new SSID & password within 5 seconds.....", (char const*)pUartQ->buffer, 53)) {
+			state_arduino_ = STATE_WIAT_CONFIG_DATA;
+			//UartPuts(UART_ESP12, "ssid:WIFI_AX,password:@i1topassi1top,host:192.168.1.10,port:7890,id:6", 69);
+			//UartPuts(UART_ESP12, "ssid:ir-SCADA,password:ir123456,host:192.168.0.30,port:7890,id:4", 64);
+		}
+		else if (0 == strncmp("Connecting to ", (char const*)pUartQ->buffer, 14)) {
+			state_arduino_ = STATE_WIAT_CONFIG_DATA;
+		}
+		else if (0 == strncmp("Wait for connecting WiFi AP... ", (char const*)pUartQ->buffer, 31)) {
+			state_arduino_ = STATE_WIAT_CONFIG_DATA;
+		}
+		else if (0 == strncmp("WiFi AP is connected", (char const*)pUartQ->buffer, 20)) {
+			state_arduino_ = STATE_CONNECTED_AP;
+		}
+		else if (0 == strncmp("Fail to connect to server", (char const*)pUartQ->buffer, 25)) {
+			state_arduino_ = STATE_CONNECTED_AP;
+		}
+		else if (0 == strncmp("Close server connection", (char const*)pUartQ->buffer, 23)) {
+			state_arduino_ = STATE_CONNECTED_AP;
+		}
+		else if (0 == strncmp("Succeed to connect to server", (char const*)pUartQ->buffer, 28)) {
+			state_arduino_ = STATE_CONNECTED_SERVER;
+		}
+		else if (0 == strncmp("WiFi AP is disconnected...", (char const*)pUartQ->buffer, 26)) {
+			state_arduino_ = STATE_NO_WIFI;
+		}
+		
+		CMD_InitBuffer(_uartType);
+		break;
+		
+	default:
+		CMD_PushChar(_uartType, ch);
+		break;
+	}
+
+	return CMD_GetBufferIndex(_uartType);
+}
+
+
+uint8_t IsConnectedArduinoServer()
+{
+	return (STATE_CONNECTED_SERVER == state_arduino_);
+}
+	
 void InitReceiveDataState()
 {
 	gvReceiveMode = STATE_RECEIVE_MODE_INIT;
