@@ -82,10 +82,19 @@ typedef struct _DUST_SENSOR_DATA {
 #define UPDATED_DUST			0x0010
 #define UPDATED_VIBRATION		0x0020
 
+
+#define DEFAULT_SENSOR_INTERAVAL_SEC	10
+#define MAX_SENSOR_INTERAVAL_SEC		3600
+
+
 typedef struct _SENSOR_DATA_PACKET {
 	uint16_t updateFlag;
 	uint16_t boardID;
 	uint32_t sequenceID;
+	uint32_t interval;
+	uint32_t intervalTick;
+	uint32_t lastIntervalTick;
+	
 	float temperature;
 	float humidity;
 	uint16_t tension;
@@ -102,7 +111,20 @@ typedef struct _SENSOR_DATA_PACKET {
 
 void InitSensor(uint16_t _boardID);
 uint32_t IsUpdatedSensorFlag();
-void ClearSensorFlag();
+void ClearUpdatedSensorFlag();
+void SetUpdatedSensorFlag();
+
+uint32_t GetInterval();
+void SetInterval(uint32_t _interval);
+
+uint32_t GetIntervalTick();
+void SetIntervalTick(uint32_t _intervalTick);
+
+uint32_t GetLastIntervalTick();
+void SetLastIntervalTick(uint32_t _lastIntervalTick);
+
+uint32_t IsExpiredIntervalTick(uint32_t _intervalTick);
+
 uint32_t MakeSensorPacket(char *packet, uint32_t size);
 uint32_t ParsingTempHum(const uint8_t *str, uint32_t len);
 uint32_t ParsingTension(const uint8_t *str, uint32_t len);

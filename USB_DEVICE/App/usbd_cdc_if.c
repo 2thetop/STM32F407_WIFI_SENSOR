@@ -300,7 +300,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 	  _freeCount = CQ_GetFreeCount(pRxQ);
 	  _saveCount = MIN(*Len, _freeCount);
 
-	  printf("UART_VCP : _receiveCount=%d, _saveCount=%d", *Len, _saveCount);
+	  //printf("UART_VCP : _receiveCount=%d, _saveCount=%d", *Len, _saveCount);
 	  
 	  CQ_PushString(pRxQ, (uint8_t *)Buf, _saveCount);
   }

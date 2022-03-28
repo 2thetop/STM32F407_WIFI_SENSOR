@@ -16,6 +16,9 @@ void InitSensor(uint16_t _boardID)
 	sdp.updateFlag = 0;
 	sdp.boardID = _boardID;
 	sdp.sequenceID = 1;
+	sdp.interval = DEFAULT_SENSOR_INTERAVAL_SEC;
+	sdp.intervalTick = DEFAULT_SENSOR_INTERAVAL_SEC * 1000;
+	sdp.lastIntervalTick = 0;
 	sdp.temperature = 0.0f;
 	sdp.humidity = 0.0f;
 	sdp.tension = 0;
@@ -33,9 +36,56 @@ uint32_t IsUpdatedSensorFlag()
 	return (0 != sdp.updateFlag);
 }
 
-void ClearSensorFlag()
+void ClearUpdatedSensorFlag()
 {
 	sdp.updateFlag = 0;
+}
+
+void SetUpdatedSensorFlag()
+{
+	sdp.updateFlag = 1;
+}
+
+uint32_t GetInterval()
+{
+	return sdp.interval;
+}
+
+void SetInterval(uint32_t _interval)
+{
+	sdp.interval = _interval;
+}
+
+uint32_t GetIntervalTick()
+{
+	return sdp.intervalTick;
+}
+
+void SetIntervalTick(uint32_t _intervalTick)
+{
+	sdp.intervalTick = _intervalTick;
+}
+
+uint32_t GetLastIntervalTick()
+{
+	return sdp.lastIntervalTick;
+}
+
+
+void SetLastIntervalTick(uint32_t _lastIntervalTick)
+{
+	sdp.lastIntervalTick = _lastIntervalTick;
+}
+
+uint32_t IsExpiredIntervalTick(uint32_t _intervalTick)
+{
+	uint32_t _isExpired = 0;
+
+	if (sdp.intervalTick < (_intervalTick - sdp.lastIntervalTick)) {
+		_isExpired = 1;
+	}
+
+	return _isExpired;
 }
 
 uint32_t MakeSensorPacket(char *packet, uint32_t size)

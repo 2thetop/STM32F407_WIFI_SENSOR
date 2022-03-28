@@ -45,8 +45,6 @@
 #define WHITE_LED_ON					0
 #define BLINK_WHITE_LED_INTERVAL		500
 
-#define SEND_SENSOR_INTERAVAL			5000
-
 
 #define MODE_NORMAL					0
 #define MODE_ESP_PASS_THROUGH		1
@@ -109,7 +107,7 @@ int main(void)
 	uint32_t current_tick_ = 0;
 	//uint32_t display_time_tick_ = 0;
 	//uint32_t check_reservation_tick_ = 0;
-	uint32_t sensor_interval_tick_ = 0;
+	//uint32_t sensor_interval_tick_ = 0;
 	uint32_t is_pressed_all_tact_sw = 0;
 
 
@@ -155,7 +153,7 @@ int main(void)
 
 #if 1
 	board_id_ = GetBoardID();
-
+	SetCdiID(board_id_);
 	InitSensor((uint16_t)board_id_);
 	
     //////////////////////////////////////////////////////////////////////////////////////
@@ -179,15 +177,16 @@ int main(void)
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// WiFi Module??? 초기??? ???.
-	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
-	HAL_Delay(2000);
-	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
+	ResetESP8266ByGPIO();
+	//HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
+	//HAL_Delay(2000);
+	//HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
 	//HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
 	//////////////////////////////////////////////////////////////////////////////////////
 
 #endif
     
-#if 1
+#if 0
     
   //HAL_SPI_MspInit(&hspi1);
   //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
@@ -231,17 +230,16 @@ int main(void)
 #else
 		UART_RX_DefaultProc();
 
-		if ((0 != IsConnectedArduinoServer()) && (1 == IsUpdatedSensorFlag())) {
-		//if (1 == IsUpdatedSensorFlag()) {
-			MakeSensorPacket(sensorPacket, sizeof(sensorPacket));
+		if ((0 != IsConnectedArduinoServer()) && (1 == IsUpdatedSensorFlag()) && 
+			(IsExpiredIntervalTick(current_tick_))) {
 
-			if (SEND_SENSOR_INTERAVAL < (current_tick_ - sensor_interval_tick_)) {
-				uint32_t _count = strlen(sensorPacket);
-				SendSensorPacketByWiFi((uint8_t*)sensorPacket, _count);
-				sensor_interval_tick_ = current_tick_;
-			}
+			MakeSensorPacket(sensorPacket, sizeof(sensorPacket));
 			
-			ClearSensorFlag();
+			uint32_t _count = strlen(sensorPacket);
+			SendSensorPacketByWiFi((uint8_t*)sensorPacket, _count);
+			SetLastIntervalTick(current_tick_);
+			
+			ClearUpdatedSensorFlag();
 		}
 			
 		UART_TX_DefaultProc();
