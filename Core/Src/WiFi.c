@@ -15,6 +15,7 @@
 #include <string.h>
 #include <time.h>
 //#include "main_define.h"
+#include "main.h"
 
 
 #define __USE_MY_AP__
@@ -165,9 +166,9 @@ const WIFI_COMM_ITEM rspArduinoTable[MAX_ARDUINO_RESPONSE_TABLE_COUNT] = {
 
 static ESTATE parsingResponse(UART_TYPE _uartType, int8_t *line, uint32_t count);
 
-static void CMD_InitBuffer(UART_TYPE _uartType);
-static void CMD_PushChar(UART_TYPE _uartType, uint8_t ch);
-static uint32_t CMD_GetBufferIndex(UART_TYPE _uartType);
+//static void CMD_InitBuffer(UART_TYPE _uartType);
+//static void CMD_PushChar(UART_TYPE _uartType, uint8_t ch);
+//static uint32_t CMD_GetBufferIndex(UART_TYPE _uartType);
 
 
 
@@ -185,7 +186,13 @@ static uint8_t aReceiveDataCount[3] = { 0 };
 //static TCPD	gTCPD;
 
 static ESTATE_ARDUINO state_arduino_ = STATE_NO_WIFI;
-
+static uint8_t cdi_updated_ = 0;
+//static CDI cdi;
+//static CDI cdi = { "WIFI_AX", "@i1topassi1top", "192.168.1.10", 7890, 6 };
+//static CDI cdi = { "WIFI_2.4G", "@i1topassi1top", "192.168.31.10", 7890, 6 };
+static CDI cdi = { "ir-SCADA", "ir123456", "192.168.0.30", 7890, 1 };
+//"ssid:WIFI_AX,password:@i1topassi1top,host:192.168.1.10,port:7890,id:6"
+//"ssid:ir-SCADA,password:ir123456,host:192.168.0.30,port:7890,id:4"
 
 WSD	wsd;
 SSD aSSD[4];
@@ -588,6 +595,14 @@ void SendWiFiCommand(ESTATE _state)
 	}
 }
 
+void ResetESP8266ByGPIO()
+{
+	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_RESET);
+	HAL_Delay(1000);
+	HAL_GPIO_WritePin(ESP_nRESET_GPIO_Port, ESP_nRESET_Pin, GPIO_PIN_SET);
+}
+
+
 void ResetESP8266()
 {
 	UartPuts(UART_ESP12, "AT+RST\r\n", 8);
@@ -952,14 +967,25 @@ uint32_t Arduino_ParsingProc(UART_TYPE _uartType, uint8_t ch)
 		}
 		else if (0 == strncmp("Waiting for new SSID & password within 5 seconds.....", (char const*)pUartQ->buffer, 53)) {
 			state_arduino_ = STATE_WIAT_CONFIG_DATA;
-			//UartPuts(UART_ESP12, "ssid:WIFI_AX,password:@i1topassi1top,host:192.168.1.10,port:7890,id:6", 69);
-			//UartPuts(UART_ESP12, "ssid:ir-SCADA,password:ir123456,host:192.168.0.30,port:7890,id:4", 64);
+			if (1 == IsUpdatedCDI()) {
+				SetUpdateCDI(0);
+				
+				char buffer[80];
+				memset(buffer, 0, sizeof(buffer));
+				sprintf(buffer, "ssid:%s,password:%s,host:%s,port:%d,id:%d",
+						cdi.ssid, cdi.password, cdi.host, cdi.port, cdi.id);
+				int _length = strlen(buffer);
+				UartPuts(UART_ESP12, (const int8_t*)buffer, _length);
+			}
 		}
+		else if (0 == strncmp("Reading config data from EEPROM.....", (char const*)pUartQ->buffer, 36)) {
+			state_arduino_ = STATE_READ_EEPROM;
+		} 
 		else if (0 == strncmp("Connecting to ", (char const*)pUartQ->buffer, 14)) {
-			state_arduino_ = STATE_WIAT_CONFIG_DATA;
+			state_arduino_ = STATE_START_CONNECTING;
 		}
 		else if (0 == strncmp("Wait for connecting WiFi AP... ", (char const*)pUartQ->buffer, 31)) {
-			state_arduino_ = STATE_WIAT_CONFIG_DATA;
+			state_arduino_ = STATE_CONNECTING_WIFI_AP;
 		}
 		else if (0 == strncmp("WiFi AP is connected", (char const*)pUartQ->buffer, 20)) {
 			state_arduino_ = STATE_CONNECTED_AP;
@@ -992,6 +1018,52 @@ uint32_t Arduino_ParsingProc(UART_TYPE _uartType, uint8_t ch)
 uint8_t IsConnectedArduinoServer()
 {
 	return (STATE_CONNECTED_SERVER == state_arduino_);
+}
+
+uint8_t IsUpdatedCDI()
+{
+	return cdi_updated_;
+}
+
+void SetUpdateCDI(uint8_t _update)
+{
+	cdi_updated_ = _update;
+}
+
+PCDI GetCDI()
+{
+	return (&cdi);
+}
+
+void SetCdiSSID(char *pbuff, uint32_t length)
+{
+	if (0 < length) {
+		strncpy(cdi.ssid, pbuff, length);
+	}
+}
+
+void SetCdiPassword(char *pbuff, uint32_t length)
+{
+	if (0 < length) {
+		strncpy(cdi.password, pbuff, length);
+	}
+}
+
+void SetCdiHost(char *pbuff, uint32_t length)
+{
+	if (0 < length) {
+		strncpy(cdi.host, pbuff, length);
+	}
+}
+
+void SetCdiPort(int num)
+{
+	cdi.port = (uint16_t)num;
+}
+
+void SetCdiID(int num)
+{
+	cdi.id = (uint16_t)num;
 }
 	
 void InitReceiveDataState()

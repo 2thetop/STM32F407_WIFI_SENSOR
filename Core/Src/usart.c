@@ -767,13 +767,23 @@ void UART_RX_DefaultProc(void)
 			CQ_PopChar(pRxQ, &_ch);
 			pUartQ->buffer[pUartQ->bufferIndex++] = _ch;       			
 
-			ProcCommand(UART_ESP12, _ch);
+			ProcCommand(UART_VCP, _ch);
 
-			if (UART_LF == _ch) {
+			if (UART_BS == _ch) {
+				pUartQ->buffer[--pUartQ->bufferIndex] = 0;
+			}
+			else if ((UART_LF == _ch) || (UART_CR == _ch)) {
+				pUartQ->buffer[pUartQ->bufferIndex++] = UART_LF;				
+				pUartQ->buffer[pUartQ->bufferIndex++] = UART_CR;				
 				CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
 				pUartQ->bufferIndex = 0;
 			}
 		}
+
+//		if (0 < pUartQ->bufferIndex ) {
+//			CDC_Transmit_FS(pUartQ->buffer, pUartQ->bufferIndex);
+//			pUartQ->bufferIndex = 0;
+//		}
 	}
 
 
@@ -966,45 +976,207 @@ void HAL_UART_BypassTest(void)
 	}
 }
 
-void ProcCommand(UART_ESP12, _ch)
+void ProcCommand(UART_TYPE ut, const int8_t _ch)
 {
-		PUART_Q pUartQ = &gUarts[UART_ESP12];
+	PCDI pcdi = GetCDI();	
+	PUART_Q pUartQ = &gUarts[ut];
 
-		switch (ch) {
-		case UART_LF:
-			CMD_PushChar(_uartType, ch);
-			CMD_PushChar(_uartType, 0);
-					
-			if (0 == strncmp("ssid:", (char const*)pUartQ->buffer, 5)) {
-				;
-			}
-			else if (0 == strncmp("password:", (char const*)pUartQ->buffer, 9)) {
-				;
-				//UartPuts(UART_ESP12, "ssid:WIFI_AX,password:@i1topassi1top,host:192.168.1.10,port:7890,id:6", 69);
-				//UartPuts(UART_ESP12, "ssid:ir-SCADA,password:ir123456,host:192.168.0.30,port:7890,id:4", 64);
-			}
-			else if (0 == strncmp("host:", (char const*)pUartQ->buffer, 5)) {
-				;
-			}
-			else if (0 == strncmp("port:", (char const*)pUartQ->buffer, 5)) {
-				;
-			}
-			else if (0 == strncmp("help", (char const*)pUartQ->buffer, 4)) {
-				;
-			}
-			else if (0 == strncmp("update", (char const*)pUartQ->buffer, 6) {
-				;
-			}
-			
-			CMD_InitBuffer(_uartType);
-			break;
-			
-		default:
-			CMD_PushChar(_uartType, ch);
-			break;
+	switch (_ch) {
+	case UART_LF:
+	case UART_CR:
+		CMD_PushChar(ut, _ch);
+		CMD_PushChar(ut, 0);
+				
+		if (0 == strncmp("getconfig", (char const*)pUartQ->buffer, 9)) {
+#if 1
+			char buffer[200];
+			//MakeConfigString(pcdi, buffer, sizeof(buffer));
+			memset(buffer, 0, sizeof(buffer)); 
+			sprintf(buffer, "\r\n<< Config Information >>\r\nid : %d\r\nssid : %s\r\npassword : %s\r\nhost : %s\r\nport : %d\r\ninterval : %d sec\r\n",
+					pcdi->id, pcdi->ssid, pcdi->password, pcdi->host, pcdi->port, GetInterval());
+#else
+			char buffer[200] = "<< Config Information >>\r\nid : 6\r\nssid : WIFI_2.4G\r\npassword : @i1topassi1top\r\nhost : 192.168.31.10\r\nport : 7890\r\n";
+#endif
+			SendString(buffer);
 		}
+		else if (0 == strncmp("ssid ", (char const*)pUartQ->buffer, 5)) {
+			ExtractString(((char const*)(pUartQ->buffer + 5)), pcdi->ssid, MAX_SSID_LENGTH);
+		}
+		else if (0 == strncmp("password ", (char const*)pUartQ->buffer, 9)) {
+			//UartPuts(UART_ESP12, "ssid:WIFI_AX,password:@i1topassi1top,host:192.168.1.10,port:7890,id:6", 69);
+			//UartPuts(UART_ESP12, "ssid:ir-SCADA,password:ir123456,host:192.168.0.30,port:7890,id:4", 64);
+			ExtractString(((char const*)(pUartQ->buffer + 9)), pcdi->password, MAX_PASSWORD_LENGTH);
+		}
+		else if (0 == strncmp("host ", (char const*)pUartQ->buffer, 5)) {
+			ExtractString(((char const*)(pUartQ->buffer + 5)), pcdi->host, MAX_HOST_IP_LENGTH);
+		}
+		else if (0 == strncmp("port ", (char const*)pUartQ->buffer, 5)) {
+			ExtractNumber(((char const*)(pUartQ->buffer + 5)), &pcdi->port);
+		}
+		else if (0 == strncmp("interval ", (char const*)pUartQ->buffer, 9)) {
+			uint16_t _interval = 0;
+			ExtractNumber(((char const*)(pUartQ->buffer + 9)), &_interval);
+
+			uint32_t _currentInterval = GetInterval();
+			if (_currentInterval != _interval) {
+				SetInterval(_interval);
+				SetIntervalTick((uint32_t)_interval * 1000);
+			}
+		}
+		else if (0 == strncmp("help", (char const*)pUartQ->buffer, 4)) {
+			//char buffer[300];
+			//MakeHelpString(buffer, sizeof(buffer));
+			SendHelpString();
+		}
+		else if (0 == strncmp("update", (char const*)pUartQ->buffer, 6)) {
+			SetUpdateCDI(1);
+			ResetESP8266ByGPIO();
+		}
+		
+		CMD_InitBuffer(ut);
+		break;
+		
+	default:
+		CMD_PushChar(ut, _ch);
+		break;
+	}
+
+	//return CMD_GetBufferIndex(ut);
+
+}
+
+#if 0
+void MakeHelpString(char* buffer, int size)
+{
+	char strHelp [] =	
+		"Command Help\r\n" \
+		"-------------------------\r\n" \
+        "getconfig : Get current configuration.\r\n  ex)  getconfig\r\n" \
+        "ssid : Set ssid string.\r\n  ex)  ssid \"<ssid name>\"\r\n" \
+		"password : Set password string.\r\n  ex)  password \"<password string>\"\r\n" \
+		"host : Set host IP address.\r\n  ex)  host \"<host ip address>\"\r\n" \
+		"port : Set port number.\r\n  ex)  port \"<port number>\"\r\n" \
+		"update : Save config data to EEPROM.\r\n  ex)  update\r\n" \
+		"help : Show help.\r\n  ex)  help\r\n\r\n";
 	
-		return CMD_GetBufferIndex(_uartType);
+	memset(buffer, 0, size);
+
+	int help_length = strlen(strHelp);
+	int copy_length = (size  < help_length) ? size : help_length;
+	strncpy(buffer, strHelp, copy_length);
+}
+#else
+void SendHelpString()
+{
+	char strHelp1 [] =	
+		"Command Help\r\n" \
+		"-------------------------\r\n" \
+        "getconfig : Get current configuration.  ex)  getconfig\r\n" \
+        "ssid : Set ssid string.  ex)  ssid \"<ssid name>\"\r\n" \
+		"password : Set password string.  ex)  password \"<password string>\"\r\n" \
+		"host : Set host IP address.  ex)  host \"<host ip address>\"\r\n";
+
+	char strHelp2 [] =	
+		"port : Set port number.  ex)  port \"<port number>\"\r\n" \
+		"interval : Set sensors polling interval. Range is 2~3600 sec. ex)  interval \"<seconds>\"\r\n" \
+		"update : Save config data to EEPROM.  ex)  update\r\n" \
+		"help : Show help.  ex)  help\r\n\r\n";
+
+	SendString(strHelp1);
+
+	HAL_Delay(100);
+	
+	SendString(strHelp2);
+}
+#endif
+
+#if 0
+void MakeConfigString(PCDI pcdi, char* buffer, int size)
+{
+	if ((NULL == pcdi) || (NULL == buffer) || (size < 0)) {
+		return;
+	}
+
+	memset(buffer, 0, size); 
+	sprintf(buffer, "id : %s\r\nssid : %s\r\npassword : %s\r\nhost : %s\r\nport : %s\r\n",
+			pcdi->id, pcdi->ssid, pcdi->password, pcdi->host, pcdi->port);
+}
+#endif
+
+void SendString(char* buffer)
+{
+	if (NULL == buffer) {
+		return;
+	}
+	
+	int _length = strlen(buffer);
+	UartPuts(UART_VCP, (const int8_t*)buffer, _length);
+}
+
+
+void ExtractString(char const* src, char *dest, int dest_size)
+{
+	char ch = '"';
+	char* pStart = strchr(src, ch);
+	if (NULL == pStart) {
+		return;
+	}
+	pStart++;
+	
+	char* pEnd = strchr(pStart, ch);
+	if (NULL == pEnd) {
+		return;
+	}
+		
+	int string_count = pEnd - pStart;
+	if (dest_size < string_count) {
+		return;
+	}
+
+	if (0 < string_count) {
+		memset(dest, 0, dest_size); 
+		int copy_length = (string_count  < dest_size) ? string_count : dest_size;
+		strncpy(dest, pStart, copy_length);
+	}
+}
+
+void ExtractNumber(char const* src, uint16_t* dest)
+{
+	char ch = '"';
+	char* pStart = strchr(src, ch);
+	if (NULL == pStart) {
+		return;
+	}
+	pStart++;
+	
+	char* pEnd = strchr(pStart, ch);
+	if (NULL == pEnd) {
+		return;
+	}
+		
+	int string_count = pEnd - pStart;
+	if (0 < string_count) {
+		*dest = atoi(pStart);
+	}
+}
+
+void GetSSID(char const* buffer, char *password)
+{
+
+}
+
+void GetPassword(char const* buffer, char *password)
+{
+
+}
+
+void GetHost(char const* buffer, char *host)
+{
+
+}
+
+void GetPort(char const* buffer, uint16_t port)
+{
 
 }
 

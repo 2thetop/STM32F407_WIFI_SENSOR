@@ -239,6 +239,9 @@ typedef enum {
 typedef enum {
 	STATE_NO_WIFI = 0,
 	STATE_WIAT_CONFIG_DATA,
+	STATE_READ_EEPROM,
+	STATE_START_CONNECTING,
+	STATE_CONNECTING_WIFI_AP,
 	STATE_CONNECTED_AP,
 	STATE_CONNECTED_SERVER,
 } ESTATE_ARDUINO;
@@ -338,6 +341,32 @@ typedef struct st_AP_INFO {
 
 
 
+#define MAX_SSID_LENGTH        32
+#define MAX_PASSWORD_LENGTH    32
+#define MAX_HOST_IP_LENGTH     15
+#define MAX_PORT_LENGTH        2
+
+typedef struct CONFIG_DATA_INFO {
+  //uint16_t size;
+  char ssid[MAX_SSID_LENGTH+1];
+  char password[MAX_PASSWORD_LENGTH+1];
+  char host[MAX_HOST_IP_LENGTH+1];
+  uint16_t port;
+  uint16_t id; 
+} CDI, *PCDI;
+
+
+
+uint32_t Arduino_ParsingProc(UART_TYPE _uartType, uint8_t ch);
+uint8_t IsConnectedArduinoServer();
+uint8_t IsUpdatedCDI();
+void SetUpdateCDI(uint8_t _update);
+PCDI GetCDI();
+void SetCdiSSID(char *puff, uint32_t length);
+void SetCdiPassword(char *puff, uint32_t length);
+void SetCdiHost(char *puff, uint32_t length);
+void SetCdiPort(int num);
+void SetCdiID(int num);
 
 
 uint32_t WiFi_ParsingProc(UART_TYPE _uartType, uint8_t ch);
@@ -348,9 +377,6 @@ void DumpCmdPack(UART_TYPE _uartType, int8_t *line, uint32_t count);
 void ParseReceiveData(UART_TYPE _uartType, uint8_t ch);
 
 uint32_t WiFi_DefaultProc(uint32_t _tick);
-
-uint32_t Arduino_ParsingProc(UART_TYPE _uartType, uint8_t ch);
-uint8_t IsConnectedArduinoServer();
 
 
 void InitWiFi();
@@ -404,6 +430,7 @@ uint8_t CheckConnectingServer(uint32_t _tick);
 
 void SendWiFiCommand(ESTATE _state);
 
+void ResetESP8266ByGPIO();
 void ResetESP8266();
 void InitESP8266Uart();
 void SetStationMode();
@@ -427,6 +454,13 @@ void DisconnectNTPServer();
 void ConfigureServer();
 void ConnectServer(int8_t *pServer, int32_t port_number);
 void DisconnectServer();
+
+
+void CMD_InitBuffer(UART_TYPE _uartType);
+void CMD_PushChar(UART_TYPE _uartType, uint8_t ch);
+uint32_t CMD_GetBufferIndex(UART_TYPE _uartType);
+
+
 #if 0
 void RequestSendPacketToNTPServer(int8_t count);
 
@@ -487,6 +521,7 @@ void ConvertNTPTimeToString(uint8_t *pstrTime, NUD *pNUD);
 void SaveRTCWithNTPTime(NUD *pNUD);
 
 #endif
+
 
 /* USER CODE END Prototypes */
 

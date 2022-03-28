@@ -77,10 +77,10 @@ typedef enum {
 	UART_P4,
 	UART_P5,
 	UART_P6,
+	UART_VCP,
+	UART_CDC=UART_VCP,
  	UART_LAST,
 	MAX_UART_PORT = UART_LAST,
-	UART_VCP=UART_LAST,
-	UART_CDC=UART_LAST,
 	UART_ESP12=UART_P1,
 	UART_TEMP_HUM=UART_P2,
 	UART_TENSION=UART_P3,
@@ -153,6 +153,23 @@ uint32_t ParsingTension(const uint8_t *str, uint32_t len);
 uint32_t ParsingUV(const uint8_t *str, uint32_t len);
 uint32_t ParsingDust(const uint8_t *str, uint32_t len);
 uint32_t ParsingVibration(const uint8_t *str, uint32_t len);
+
+
+void ProcCommand(UART_TYPE ut, const int8_t _ch);
+
+//void MakeHelpString(char* buffer, int size);
+void SendHelpString();
+//void MakeConfigString(PCDI pcdi, char* buffer, int size);
+void SendString(char* buffer);
+
+
+void ExtractString(char const* src, char *dest, int dest_size);
+void ExtractNumber(char const* src, uint16_t* dest);
+void GetSSID(char const* buffer, char *ssid);
+void GetPassword(char const* buffer, char *password);
+void GetHost(char const* buffer, char *host);
+void GetPort(char const* buffer, uint16_t port);
+	
 
 /* USER CODE END Prototypes */
 
